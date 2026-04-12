@@ -1,0 +1,351 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "typeSchema": "",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "varchar(255)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(255)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(255)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stripe_customer_id": {
+          "name": "stripe_customer_id",
+          "type": "varchar(255)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "uniqueConstraints": {
+        "email_unique": {
+          "name": "email_unique",
+          "columns": ["email"]
+        },
+        "stripe_customer_id_unique": {
+          "name": "stripe_customer_id_unique",
+          "columns": ["stripe_customer_id"]
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {}
+    },
+    "genres": {
+      "name": "genres",
+      "schema": "",
+      "columns": {
+        "genre_id": {
+          "name": "genre_id",
+          "type": "serial",
+          "typeSchema": "",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "genre": {
+          "name": "genre",
+          "type": "varchar(255)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "genres_user_id_idx": {
+          "name": "genres_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
+        },
+        "unique_user_genre": {
+          "name": "unique_user_genre",
+          "columns": ["user_id", "genre"],
+          "isUnique": true
+        }
+      },
+      "uniqueConstraints": {},
+      "foreignKeys": {
+        "genres_user_id_users_user_id_fk": {
+          "name": "genres_user_id_users_user_id_fk",
+          "tableFrom": "genres",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {}
+    },
+    "plans": {
+      "name": "plans",
+      "schema": "",
+      "columns": {
+        "plan_id": {
+          "name": "plan_id",
+          "type": "serial",
+          "typeSchema": "",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "plan_type": {
+          "name": "plan_type",
+          "type": "varchar(50)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_year_plan": {
+          "name": "is_year_plan",
+          "type": "boolean",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "stripe_subscription_id": {
+          "name": "stripe_subscription_id",
+          "type": "varchar(255)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "timestamp",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "plans_user_id_idx": {
+          "name": "plans_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
+        }
+      },
+      "uniqueConstraints": {},
+      "foreignKeys": {
+        "plans_user_id_users_user_id_fk": {
+          "name": "plans_user_id_users_user_id_fk",
+          "tableFrom": "plans",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {}
+    },
+    "billing": {
+      "name": "billing",
+      "schema": "",
+      "columns": {
+        "billing_id": {
+          "name": "billing_id",
+          "type": "serial",
+          "typeSchema": "",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "plan_type": {
+          "name": "plan_type",
+          "type": "varchar(50)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_year_plan": {
+          "name": "is_year_plan",
+          "type": "boolean",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "amount_cents": {
+          "name": "amount_cents",
+          "type": "serial",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "stripe_payment_intent_id": {
+          "name": "stripe_payment_intent_id",
+          "type": "varchar(255)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stripe_invoice_id": {
+          "name": "stripe_invoice_id",
+          "type": "varchar(255)",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "billed_at": {
+          "name": "billed_at",
+          "type": "timestamp",
+          "typeSchema": "",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "billing_user_id_idx": {
+          "name": "billing_user_id_idx",
+          "columns": ["user_id"],
+          "isUnique": false
+        }
+      },
+      "uniqueConstraints": {},
+      "foreignKeys": {
+        "billing_user_id_users_user_id_fk": {
+          "name": "billing_user_id_users_user_id_fk",
+          "tableFrom": "billing",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}

@@ -1,0 +1,85 @@
+import request from 'supertest';
+import jwt from 'jsonwebtoken';
+import app from '../app';
+
+jest.mock('../config/database', () => ({
+  __esModule: true,
+  default: { query: jest.fn(), connect: jest.fn() },
+}));
+jest.mock('../config/stripe', () => ({ __esModule: true, default: {} }));
+
+import pool from '../config/database';
+const mockPool = pool as jest.Mocked<typeof pool>;
+
+describe('Auth Middleware', () => {
+  describe('GET /health (no auth required — baseline)', () => {
+    it('returns 200', async () => {
+      const res = await request(app).get('/health');
+      expect(res.status).toBe(200);
+    });
+  });
+
+  describe('Protected route without token', () => {
+    it('returns 401 when Authorization header is missing', async () => {
+      const res = await request(app).post('/user/logout').send({ userId: 'some-id' });
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe('No token provided');
+    });
+
+    it('returns 401 when Authorization header is malformed', async () => {
+      const res = await request(app)
+        .post('/user/logout')
+        .set('Authorization', 'Token abc123')
+        .send({ userId: 'some-id' });
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe('No token provided');
+    });
+  });
+
+  describe('Protected route with invalid token', () => {
+    it('returns 401 when token signature is wrong', async () => {
+      const res = await request(app)
+        .post('/user/logout')
+        .set('Authorization', 'Bearer not.a.real.token')
+        .send({ userId: 'some-id' });
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe('Invalid token');
+    });
+  });
+
+  describe('Protected route with revoked token', () => {
+    it('returns 401 when token is not found in the authentication table', async () => {
+      const token = jwt.sign({ userId: 'test-user-id' }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] }); // no row in authentication table
+
+      const res = await request(app)
+        .post('/user/logout')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ userId: 'test-user-id' });
+
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe('Token expired or revoked');
+    });
+  });
+
+  describe('Protected route with valid token', () => {
+    it('passes through to route handler when token is valid', async () => {
+      const userId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+      const token = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+
+      // auth middleware query: token found in DB
+      (mockPool.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ user_id: userId }] }) // auth check
+        .mockResolvedValueOnce({ rows: [] }); // DELETE in logout handler
+
+      const res = await request(app)
+        .post('/user/logout')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ userId });
+
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe('ok');
+    });
+  });
+});
