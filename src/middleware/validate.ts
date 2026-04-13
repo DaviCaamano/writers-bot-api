@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodSchema, ZodError } from 'zod';
+import { ZodSchema, ZodError, z } from 'zod';
 
 /**
  * Validates req.body against a Zod schema.
@@ -39,5 +39,5 @@ export const validateParams =
   };
 
 function formatErrors(error: ZodError): Record<string, string[]> {
-  return error.flatten().fieldErrors as Record<string, string[]>;
+  return z.treeifyError(error);
 }

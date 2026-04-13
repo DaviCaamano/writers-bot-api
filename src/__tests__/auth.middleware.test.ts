@@ -51,7 +51,7 @@ describe('Auth Middleware', () => {
     it('returns 401 when token is not found in the authentication table', async () => {
       const token = jwt.sign({ userId: 'test-user-id' }, process.env.JWT_SECRET!, { expiresIn: '7d' });
 
-      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] }); // no row in authentication table
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] }); // no row in the authentication table
 
       const res = await request(app)
         .post('/user/logout')

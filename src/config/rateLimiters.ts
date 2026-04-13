@@ -4,6 +4,15 @@ const rateLimitMessage = (action: string) => ({
   error: `Too many ${action} attempts, please try again later`,
 });
 
+/** Applied globally to all authenticated endpoints */
+export const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100,
+  message: rateLimitMessage('request'),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+});
+
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 10,

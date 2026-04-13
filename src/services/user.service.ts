@@ -2,25 +2,42 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pool from '../config/database';
 import stripe from '../config/stripe';
-import { fetchLegacy } from '../helpers/legacy';
-import { UserRow, PlanRow, BillingRow, PlanType } from '../types';
-import type { LoginBody, CreateUserBody, UpdateUserBody, SubscribeBody } from '../schemas/user.schemas';
+import logger from '../config/logger';
+import { fetchLegacy } from '../utils/legacy';
+import type {
+  LoginBody,
+  CreateUserBody,
+  UpdateUserBody,
+  SubscribeBody,
+} from '../schemas/user.schemas';
+import { BillingRow, PlanRow, UserRow } from '../types/database';
+import { PlanType } from '../types/plan';
 
 const SALT_ROUNDS = 12;
 
-// ── Login ────────────────────────────────────────────────────────
+// ── Domain errors ────────────────────────────────────────────────
 
 export class InvalidCredentialsError extends Error {}
 export class EmailTakenError extends Error {}
 
-export async function login(data: LoginBody) {
-  const userResult = await pool.query<UserRow>('SELECT * FROM users WHERE email = $1', [data.email]);
+// ── Login ────────────────────────────────────────────────────────
 
-  if (userResult.rows.length === 0) throw new InvalidCredentialsError();
+export async function login(data: LoginBody) {
+  const userResult = await pool.query<UserRow>('SELECT * FROM users WHERE email = $1', [
+    data.email,
+  ]);
+
+  if (userResult.rows.length === 0) {
+    logger.info({ email: data.email }, 'Login failed: unknown email');
+    throw new InvalidCredentialsError();
+  }
 
   const user = userResult.rows[0];
   const passwordMatch = await bcrypt.compare(data.password, user.password_hash);
-  if (!passwordMatch) throw new InvalidCredentialsError();
+  if (!passwordMatch) {
+    logger.info({ userId: user.user_id }, 'Login failed: wrong password');
+    throw new InvalidCredentialsError();
+  }
 
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
   const token = jwt.sign(
@@ -30,10 +47,11 @@ export async function login(data: LoginBody) {
   );
 
   const expiresAt = new Date(Date.now() + parseExpiry(expiresIn));
-  await pool.query(
-    'INSERT INTO authentication (user_id, token, expires_at) VALUES ($1, $2, $3)',
-    [user.user_id, token, expiresAt],
-  );
+  await pool.query('INSERT INTO authentication (user_id, token, expires_at) VALUES ($1, $2, $3)', [
+    user.user_id,
+    token,
+    expiresAt,
+  ]);
 
   const planResult = await pool.query<PlanRow>(
     'SELECT plan_type FROM plans WHERE user_id = $1 AND is_active = TRUE LIMIT 1',
@@ -41,6 +59,8 @@ export async function login(data: LoginBody) {
   );
 
   const legacy = await fetchLegacy(user.user_id);
+
+  logger.info({ userId: user.user_id }, 'User logged in');
 
   return {
     email: user.email,
@@ -53,10 +73,15 @@ export async function login(data: LoginBody) {
   };
 }
 
-// ── Logout ───────────────────────────────────────────────────────
+// ── Logout (revoke only the specific session token) ──────────────
 
-export async function logout(userId: string) {
-  await pool.query('DELETE FROM authentication WHERE user_id = $1', [userId]);
+export async function logout(token: string) {
+  const result = await pool.query('DELETE FROM authentication WHERE token = $1 RETURNING user_id', [
+    token,
+  ]);
+  if (result.rows.length > 0) {
+    logger.info({ userId: result.rows[0].user_id }, 'User logged out');
+  }
 }
 
 // ── Create user ──────────────────────────────────────────────────
@@ -70,6 +95,8 @@ export async function createUser(data: CreateUserBody) {
     'INSERT INTO users (first_name, last_name, email, password_hash) VALUES ($1, $2, $3, $4)',
     [data.firstName, data.lastName, data.email, passwordHash],
   );
+
+  logger.info({ email: data.email }, 'User account created');
 }
 
 // ── Update user ──────────────────────────────────────────────────
@@ -83,19 +110,29 @@ export async function updateUser(userId: string, data: UpdateUserBody) {
     const values: (string | Date)[] = [];
     let paramIdx = 1;
 
-    if (data.firstName) { updates.push(`first_name = $${paramIdx++}`); values.push(data.firstName); }
-    if (data.lastName)  { updates.push(`last_name = $${paramIdx++}`);  values.push(data.lastName); }
+    if (data.firstName) {
+      updates.push(`first_name = $${paramIdx++}`);
+      values.push(data.firstName);
+    }
+    if (data.lastName) {
+      updates.push(`last_name = $${paramIdx++}`);
+      values.push(data.lastName);
+    }
     if (data.password) {
       const hash = await bcrypt.hash(data.password, SALT_ROUNDS);
       updates.push(`password_hash = $${paramIdx++}`);
       values.push(hash);
+      logger.info({ userId }, 'Password changed');
     }
 
     if (updates.length > 0) {
       updates.push(`updated_at = $${paramIdx++}`);
       values.push(new Date());
       values.push(userId);
-      await client.query(`UPDATE users SET ${updates.join(', ')} WHERE user_id = $${paramIdx}`, values);
+      await client.query(
+        `UPDATE users SET ${updates.join(', ')} WHERE user_id = $${paramIdx}`,
+        values,
+      );
     }
 
     if (data.genres) {
@@ -121,6 +158,8 @@ export async function updateUser(userId: string, data: UpdateUserBody) {
     [userId],
   );
 
+  logger.info({ userId, fields: Object.keys(data) }, 'User updated');
+
   return {
     userId: user.user_id,
     firstName: user.first_name,
@@ -141,7 +180,9 @@ export async function addGenres(userId: string, genres: string[]) {
     );
   }
 
-  const result = await pool.query('SELECT genre FROM genres WHERE user_id = $1 ORDER BY genre', [userId]);
+  const result = await pool.query('SELECT genre FROM genres WHERE user_id = $1 ORDER BY genre', [
+    userId,
+  ]);
   return result.rows.map((r) => r.genre as string);
 }
 
@@ -160,10 +201,16 @@ export async function getBillingHistory(userId: string) {
     planType: b.plan_type,
     isYearPlan: b.is_year_plan,
     amountCents: b.amount_cents,
-    stripePaymentIntentId: b.stripe_payment_intent_id,
-    stripeInvoiceId: b.stripe_invoice_id,
     billedAt: b.billed_at,
   }));
+}
+
+// ── Delete user (GDPR / account deletion) ────────────────────────
+
+export async function deleteUser(userId: string) {
+  // All related tables cascade-delete from users.user_id
+  await pool.query('DELETE FROM users WHERE user_id = $1', [userId]);
+  logger.info({ userId }, 'User account deleted');
 }
 
 // ── Subscribe ────────────────────────────────────────────────────
@@ -182,19 +229,30 @@ export async function subscribe(userId: string, data: SubscribeBody) {
       name: `${user.first_name} ${user.last_name}`,
     });
     stripeCustomerId = customer.id;
-    await pool.query('UPDATE users SET stripe_customer_id = $1 WHERE user_id = $2', [stripeCustomerId, userId]);
+    await pool.query('UPDATE users SET stripe_customer_id = $1 WHERE user_id = $2', [
+      stripeCustomerId,
+      userId,
+    ]);
   }
 
   await stripe.paymentMethods.attach(paymentMethodId, { customer: stripeCustomerId });
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amountCents,
-    currency: 'usd',
-    customer: stripeCustomerId,
-    payment_method: paymentMethodId,
-    confirm: true,
-    automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
-  });
+  const paymentIntent = await stripe.paymentIntents.create(
+    {
+      amount: amountCents,
+      currency: 'usd',
+      customer: stripeCustomerId,
+      payment_method: paymentMethodId,
+      confirm: true,
+      automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
+    },
+    { idempotencyKey: `subscribe_${userId}_${Date.now()}` },
+  );
+
+  if (paymentIntent.status !== 'succeeded') {
+    logger.warn({ userId, status: paymentIntent.status }, 'Payment not succeeded');
+    throw new Error(`Payment failed with status: ${paymentIntent.status}`);
+  }
 
   const client = await pool.connect();
   try {
@@ -221,12 +279,18 @@ export async function subscribe(userId: string, data: SubscribeBody) {
     client.release();
   }
 
+  logger.info({ userId, planType, yearPlan, amountCents }, 'Subscription created');
+
   return { amountCents, planType, yearPlan };
 }
 
 // ── Private helpers ──────────────────────────────────────────────
 
-async function calculatePrice(userId: string, planType: PlanType, yearPlan: boolean): Promise<number> {
+async function calculatePrice(
+  userId: string,
+  planType: PlanType,
+  yearPlan: boolean,
+): Promise<number> {
   if (yearPlan) return planType === 'pro-plan' ? 10000 : 30000;
 
   const countResult = await pool.query(
@@ -244,10 +308,15 @@ function parseExpiry(exp: string): number {
   if (!match) return 7 * 24 * 60 * 60 * 1000;
   const num = parseInt(match[1], 10);
   switch (match[2]) {
-    case 's': return num * 1000;
-    case 'm': return num * 60 * 1000;
-    case 'h': return num * 60 * 60 * 1000;
-    case 'd': return num * 24 * 60 * 60 * 1000;
-    default:  return 7 * 24 * 60 * 60 * 1000;
+    case 's':
+      return num * 1000;
+    case 'm':
+      return num * 60 * 1000;
+    case 'h':
+      return num * 60 * 60 * 1000;
+    case 'd':
+      return num * 24 * 60 * 60 * 1000;
+    default:
+      return 7 * 24 * 60 * 60 * 1000;
   }
 }

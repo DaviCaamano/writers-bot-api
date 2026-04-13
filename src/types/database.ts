@@ -1,5 +1,3 @@
-import { Request } from 'express';
-
 // ── Database row types ──────────────────────────────────────────
 
 export interface UserRow {
@@ -71,59 +69,13 @@ export interface BillingRow {
   billed_at: Date;
 }
 
+
+
+
 export interface AuthenticationRow {
   auth_id: string;
   user_id: string;
   token: string;
   created_at: Date;
   expires_at: Date;
-}
-
-// ── API response types ──────────────────────────────────────────
-
-export interface DocumentResponse {
-  documentId: string;
-  storyId: string;
-  title: string;
-  body: string;
-  predecessorId: string | null;
-  successorId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface StoryResponse {
-  storyId: string;
-  worldId: string;
-  title: string;
-  documents: DocumentResponse[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface WorldResponse {
-  worldId: string;
-  userId: string;
-  title: string;
-  stories: StoryResponse[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface LoginResponse {
-  email: string;
-  userId: string;
-  plan: 'pro-plan' | 'max-plan' | null;
-  firstName: string;
-  lastName: string;
-  legacy: WorldResponse[];
-  token: string;
-}
-
-export type PlanType = 'pro-plan' | 'max-plan';
-
-// ── Extended Request with auth ──────────────────────────────────
-
-export interface AuthRequest extends Request {
-  userId?: string;
 }

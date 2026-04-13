@@ -7,7 +7,6 @@ import {
   CreateUserSchema,
   UpdateUserSchema,
   GenresSchema,
-  LogoutSchema,
   SubscribeSchema,
 } from '../schemas/user.schemas';
 import {
@@ -36,46 +35,46 @@ const ErrorSchema = registry.register(
 const DocumentSchema = registry.register(
   'Document',
   z.object({
-    documentId: z.string().uuid(),
-    storyId: z.string().uuid(),
+    documentId: z.uuid(),
+    storyId: z.uuid(),
     title: z.string(),
     body: z.string(),
-    predecessorId: z.string().uuid().nullable(),
-    successorId: z.string().uuid().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    predecessorId: z.uuid().nullable(),
+    successorId: z.uuid().nullable(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   }),
 );
 
 const StorySchema = registry.register(
   'Story',
   z.object({
-    storyId: z.string().uuid(),
-    worldId: z.string().uuid(),
+    storyId: z.uuid(),
+    worldId: z.uuid(),
     title: z.string(),
     documents: z.array(DocumentSchema),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   }),
 );
 
 const WorldSchema = registry.register(
   'World',
   z.object({
-    worldId: z.string().uuid(),
-    userId: z.string().uuid(),
+    worldId: z.uuid(),
+    userId: z.uuid(),
     title: z.string(),
     stories: z.array(StorySchema),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   }),
 );
 
 const LoginResponseSchema = registry.register(
   'LoginResponse',
   z.object({
-    email: z.string().email(),
-    userId: z.string().uuid(),
+    email: z.email(),
+    userId: z.uuid(),
     plan: z.enum(['pro-plan', 'max-plan']).nullable(),
     firstName: z.string(),
     lastName: z.string(),
@@ -89,7 +88,6 @@ const LoginRequest = registry.register('LoginRequest', LoginSchema);
 const CreateUserRequest = registry.register('CreateUserRequest', CreateUserSchema);
 const UpdateUserRequest = registry.register('UpdateUserRequest', UpdateUserSchema);
 const GenresRequest = registry.register('GenresRequest', GenresSchema);
-const LogoutRequest = registry.register('LogoutRequest', LogoutSchema);
 const SubscribeRequest = registry.register('SubscribeRequest', SubscribeSchema);
 const UpsertDocumentRequest = registry.register('UpsertDocumentRequest', UpsertDocumentSchema);
 const UpsertStoryRequest = registry.register('UpsertStoryRequest', UpsertStorySchema);
@@ -101,7 +99,6 @@ const secured = [{ bearerAuth: [] }];
 const err400 = { description: 'Validation error', content: { 'application/json': { schema: ErrorSchema } } };
 const err401 = { description: 'Unauthorized', content: { 'application/json': { schema: ErrorSchema } } };
 const err404 = { description: 'Not found', content: { 'application/json': { schema: ErrorSchema } } };
-const err409 = { description: 'Conflict', content: { 'application/json': { schema: ErrorSchema } } };
 const err500 = { description: 'Internal server error', content: { 'application/json': { schema: ErrorSchema } } };
 
 // ── User paths ────────────────────────────────────────────────────
@@ -117,9 +114,8 @@ registry.registerPath({
 
 registry.registerPath({
   method: 'post', path: '/user/logout', tags: ['User'],
-  summary: 'Log out and revoke JWT',
+  summary: 'Log out and revoke the current session token',
   security: secured,
-  request: { body: json(LogoutRequest) },
   responses: { 200: { description: 'Logged out', ...json(StatusOkSchema) }, 401: err401, 500: err500 },
 });
 
@@ -127,7 +123,7 @@ registry.registerPath({
   method: 'post', path: '/user/create', tags: ['User'],
   summary: 'Create a new user account',
   request: { body: json(CreateUserRequest) },
-  responses: { 201: { description: 'User created', ...json(StatusOkSchema) }, 400: err400, 409: err409, 500: err500 },
+  responses: { 201: { description: 'User created', ...json(StatusOkSchema) }, 400: err400, 500: err500 },
 });
 
 registry.registerPath({
@@ -151,7 +147,7 @@ registry.registerPath({
 
 registry.registerPath({
   method: 'post', path: '/user/deleteme', tags: ['User'],
-  summary: 'Delete current user (placeholder)',
+  summary: 'Permanently delete the authenticated user and all their data',
   security: secured,
   responses: { 200: { description: 'OK', ...json(StatusOkSchema) }, 401: err401 },
 });
@@ -160,7 +156,7 @@ registry.registerPath({
   method: 'get', path: '/users/billing-history/{userId}', tags: ['User'],
   summary: 'Get billing history for a user (last 2 years)',
   security: secured,
-  request: { params: z.object({ userId: z.string().uuid() }) },
+  request: { params: z.object({ userId: z.uuid() }) },
   responses: { 200: { description: 'Billing history' }, 400: err400, 401: err401, 500: err500 },
 });
 

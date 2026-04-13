@@ -1,21 +1,20 @@
 import pool from '../config/database';
-import { fetchWorldById } from '../helpers/legacy';
-import { DocumentRow, StoryRow } from '../types';
+import { fetchWorldById } from '../utils/legacy';
 import type { UpsertDocumentBody, UpsertStoryBody, UpsertWorldBody } from '../schemas/story.schemas';
+import { withTransaction } from '../utils/withTransaction';
+import { DocumentRow, StoryRow } from '../types/database';
 
 export class StoryNotFoundError extends Error {}
 export class WorldNotFoundError extends Error {}
 export class DocumentNotFoundError extends Error {}
+
 
 // ── Document ─────────────────────────────────────────────────────
 
 export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
   const { documentId, title, body, storyId } = data;
 
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-
+  return withTransaction(async (client) => {
     let targetStoryId = storyId;
     let worldId: string;
 
@@ -30,13 +29,11 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
       );
 
       if (existingDoc.rows.length === 0) {
-        await client.query('ROLLBACK');
         throw new DocumentNotFoundError();
       }
 
-      // Verify user owns this document
+      // Verify the user owns this document
       if (existingDoc.rows[0].user_id !== userId) {
-        await client.query('ROLLBACK');
         throw new DocumentNotFoundError();
       }
 
@@ -46,11 +43,10 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
       );
 
       worldId = existingDoc.rows[0].world_id;
-      await client.query('COMMIT');
       return fetchWorldById(worldId);
     }
 
-    // Create new document: determine or create the story
+    // Create a new document: determine or create the story
     if (!targetStoryId) {
       const worldResult = await client.query(
         'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
@@ -70,7 +66,6 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
         [targetStoryId, userId],
       );
       if (storyResult.rows.length === 0) {
-        await client.query('ROLLBACK');
         throw new StoryNotFoundError();
       }
       worldId = storyResult.rows[0].world_id;
@@ -100,14 +95,8 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
       );
     }
 
-    await client.query('COMMIT');
     return fetchWorldById(worldId);
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
+  });
 }
 
 // ── Story ────────────────────────────────────────────────────────
@@ -115,10 +104,7 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
 export async function upsertStory(userId: string, data: UpsertStoryBody) {
   const { storyId, title, worldId } = data;
 
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-
+  return withTransaction(async (client) => {
     let resultWorldId: string;
 
     if (storyId) {
@@ -142,7 +128,6 @@ export async function upsertStory(userId: string, data: UpsertStoryBody) {
             [worldId, userId],
           );
           if (targetWorld.rows.length === 0) {
-            await client.query('ROLLBACK');
             throw new WorldNotFoundError();
           }
           await client.query(
@@ -152,7 +137,6 @@ export async function upsertStory(userId: string, data: UpsertStoryBody) {
           resultWorldId = worldId;
         }
 
-        await client.query('COMMIT');
         return fetchWorldById(resultWorldId);
       }
     }
@@ -163,7 +147,6 @@ export async function upsertStory(userId: string, data: UpsertStoryBody) {
         [worldId, userId],
       );
       if (worldCheck.rows.length === 0) {
-        await client.query('ROLLBACK');
         throw new WorldNotFoundError();
       }
       resultWorldId = worldId;
@@ -176,14 +159,8 @@ export async function upsertStory(userId: string, data: UpsertStoryBody) {
     }
 
     await client.query('INSERT INTO stories (world_id, title) VALUES ($1, $2)', [resultWorldId, title]);
-    await client.query('COMMIT');
     return fetchWorldById(resultWorldId);
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
+  });
 }
 
 // ── World ────────────────────────────────────────────────────────
