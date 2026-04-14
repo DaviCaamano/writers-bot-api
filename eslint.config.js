@@ -1,8 +1,8 @@
-const js = require('@eslint/js');
-const tseslint = require('@typescript-eslint/eslint-plugin');
-const eslintConfigPrettier = require('eslint-config-prettier');
+import js from '@eslint/js';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
-module.exports = [
+export default [
   {
     ignores: ['dist/**', 'coverage/**'],
   },
@@ -14,6 +14,12 @@ module.exports = [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    files: ['src/**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   eslintConfigPrettier,

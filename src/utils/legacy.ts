@@ -2,7 +2,7 @@ import pool from '@/config/database';
 import { DocumentRow, StoryRow, WorldRow } from '@/types/database';
 import { DocumentResponse, StoryResponse, WorldResponse } from '@/types/response';
 
-function mapDocument(row: DocumentRow): DocumentResponse {
+function mapDocumentResponse(row: DocumentRow): DocumentResponse {
   return {
     documentId: row.document_id,
     storyId: row.story_id,
@@ -15,7 +15,7 @@ function mapDocument(row: DocumentRow): DocumentResponse {
   };
 }
 
-function mapStory(row: StoryRow, documents: DocumentResponse[]): StoryResponse {
+function mapStoryResponse(row: StoryRow, documents: DocumentResponse[]): StoryResponse {
   return {
     storyId: row.story_id,
     worldId: row.world_id,
@@ -26,7 +26,7 @@ function mapStory(row: StoryRow, documents: DocumentResponse[]): StoryResponse {
   };
 }
 
-function mapWorld(row: WorldRow, stories: StoryResponse[]): WorldResponse {
+function mapWorldResponse(row: WorldRow, stories: StoryResponse[]): WorldResponse {
   return {
     worldId: row.world_id,
     userId: row.user_id,
@@ -71,7 +71,7 @@ export async function fetchLegacy(userId: string): Promise<WorldResponse[]> {
   const docsByStory = new Map<string, DocumentResponse[]>();
   for (const doc of documentRows) {
     const arr = docsByStory.get(doc.story_id) ?? [];
-    arr.push(mapDocument(doc));
+    arr.push(mapDocumentResponse(doc));
     docsByStory.set(doc.story_id, arr);
   }
 
@@ -79,12 +79,12 @@ export async function fetchLegacy(userId: string): Promise<WorldResponse[]> {
   const storiesByWorld = new Map<string, StoryResponse[]>();
   for (const story of storiesResult.rows) {
     const arr = storiesByWorld.get(story.world_id) ?? [];
-    arr.push(mapStory(story, docsByStory.get(story.story_id) ?? []));
+    arr.push(mapStoryResponse(story, docsByStory.get(story.story_id) ?? []));
     storiesByWorld.set(story.world_id, arr);
   }
 
   return worldsResult.rows.map((world) =>
-    mapWorld(world, storiesByWorld.get(world.world_id) ?? []),
+    mapWorldResponse(world, storiesByWorld.get(world.world_id) ?? []),
   );
 }
 
@@ -119,13 +119,13 @@ export async function fetchWorldById(worldId: string): Promise<WorldResponse | n
   const docsByStory = new Map<string, DocumentResponse[]>();
   for (const doc of documentRows) {
     const arr = docsByStory.get(doc.story_id) ?? [];
-    arr.push(mapDocument(doc));
+    arr.push(mapDocumentResponse(doc));
     docsByStory.set(doc.story_id, arr);
   }
 
   const stories = storiesResult.rows.map((story) =>
-    mapStory(story, docsByStory.get(story.story_id) ?? []),
+    mapStoryResponse(story, docsByStory.get(story.story_id) ?? []),
   );
 
-  return mapWorld(world, stories);
+  return mapWorldResponse(world, stories);
 }

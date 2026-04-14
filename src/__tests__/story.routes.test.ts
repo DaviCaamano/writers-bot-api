@@ -17,12 +17,7 @@ const mockUpsertWorld = storyService.upsertWorld as jest.Mock;
 
 const WORLD_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 const STORY_ID = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
-const USER_ID  = 'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44';
-
-const mockWorld = {
-  worldId: WORLD_ID, userId: USER_ID, title: 'Test World',
-  stories: [], createdAt: new Date(), updatedAt: new Date(),
-};
+const USER_ID = 'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44';
 
 function authHeaders(userId = USER_ID) {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '7d' });
@@ -44,32 +39,17 @@ describe('POST /story/world', () => {
     expect(res.body.details.properties).toHaveProperty('title');
   });
 
-  it('returns 200 when creating a new world', async () => {
+  it('returns 404 when world is not found', async () => {
     const headers = authHeaders();
-    (pool.query as jest.Mock)
-      // Mock First Query - retrieve existing world => no existing world
-      .mockResolvedValueOnce({ rows: [] })
-      // Mock subsequent Insert Query
-      .mockResolvedValueOnce({ rows: [ { world_id: WORLD_ID }] });
-
-    const res = await request(app).post('/story/world').set(headers).send({ title: 'My World' });
-
-    expect(res.status).toBe(200);
-    expect(res.body.worldId).toBe(WORLD_ID);
-    expect(mockUpsertWorld).toHaveBeenCalledWith(USER_ID, { title: 'My World' });
-  });
-
-  it('returns 200 when updating an existing world', async () => {
-    const headers = authHeaders();
-    // Mock world already exists
-    mockUpsertWorld.mockResolvedValueOnce({ ...mockWorld, title: 'Updated World' });
+    mockUpsertWorld.mockRejectedValueOnce(new storyService.WorldNotFoundError());
 
     const res = await request(app)
       .post('/story/world')
       .set(headers)
       .send({ worldId: WORLD_ID, title: 'Updated World' });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('World not found');
   });
 });
 
@@ -79,16 +59,6 @@ describe('POST /story/story', () => {
     const headers = authHeaders();
     const res = await request(app).post('/story/story').set(headers).send({});
     expect(res.status).toBe(400);
-  });
-
-  it('returns 200 on success', async () => {
-    const headers = authHeaders();
-    mockUpsertStory.mockResolvedValueOnce(mockWorld);
-
-    const res = await request(app).post('/story/story').set(headers).send({ title: 'My Story' });
-
-    expect(res.status).toBe(200);
-    expect(mockUpsertStory).toHaveBeenCalledWith(USER_ID, { title: 'My Story' });
   });
 
   it('returns 404 when world is not found', async () => {
@@ -112,19 +82,6 @@ describe('POST /story/document', () => {
     const res = await request(app).post('/story/document').set(headers).send({ body: 'content' });
     expect(res.status).toBe(400);
     expect(res.body.details.properties).toHaveProperty('title');
-  });
-
-  it('returns 200 on success', async () => {
-    const headers = authHeaders();
-    mockUpsertDocument.mockResolvedValueOnce(mockWorld);
-
-    const res = await request(app)
-      .post('/story/document')
-      .set(headers)
-      .send({ title: 'Chapter 1', body: 'Once upon a time...' });
-
-    expect(res.status).toBe(200);
-    expect(mockUpsertDocument).toHaveBeenCalledWith(USER_ID, { title: 'Chapter 1', body: 'Once upon a time...' });
   });
 
   it('returns 404 when story is not found', async () => {

@@ -65,8 +65,16 @@ router.post(
   generalLimiter,
   validate(UpsertWorldSchema),
   async (req: AuthRequest, res: Response): Promise<void> => {
-    const world = await upsertWorld(req.userId!, req.body as UpsertWorldBody);
-    res.json(world);
+    try {
+      const world = await upsertWorld(req.userId!, req.body as UpsertWorldBody);
+      res.json(world);
+    } catch (err) {
+      if (err instanceof WorldNotFoundError) {
+        res.status(404).json({ error: 'World not found' });
+      } else {
+        throw err;
+      }
+    }
   },
 );
 

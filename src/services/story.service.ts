@@ -2,12 +2,12 @@ import pool from '@/config/database';
 import { fetchWorldById } from '@/utils/legacy';
 import type { UpsertDocumentBody, UpsertStoryBody, UpsertWorldBody } from '@/schemas/story.schemas';
 import { withTransaction } from '@/utils/withTransaction';
-import { DocumentRow, StoryRow } from '@/types/database';
+import { DocumentRow, StoryRow, WorldRow } from '@/types/database';
+import type { WorldResponse } from '@/types/response';
 
 export class StoryNotFoundError extends Error {}
 export class WorldNotFoundError extends Error {}
 export class DocumentNotFoundError extends Error {}
-
 
 // Document
 export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
@@ -156,39 +156,39 @@ export async function upsertStory(userId: string, data: UpsertStoryBody) {
       resultWorldId = newWorld.rows[0].world_id;
     }
 
-    await client.query('INSERT INTO stories (world_id, title) VALUES ($1, $2)', [resultWorldId, title]);
+    await client.query('INSERT INTO stories (world_id, title) VALUES ($1, $2)', [
+      resultWorldId,
+      title,
+    ]);
     return fetchWorldById(resultWorldId);
   });
 }
 
 // World
-export async function upsertWorld(userId: string, data: UpsertWorldBody) {
+export async function upsertWorld(
+  userId: string,
+  data: UpsertWorldBody,
+): Promise<WorldResponse | null> {
   const { worldId, title } = data;
 
-  let resultWorldId: string;
-
   if (worldId) {
-    const existing = await pool.query(
-      'SELECT 1 FROM worlds WHERE world_id = $1 AND user_id = $2',
-      [worldId, userId],
-    );
-    if (existing.rows.length > 0) {
-      await pool.query('UPDATE worlds SET title = $1, updated_at = NOW() WHERE world_id = $2', [title, worldId]);
-      resultWorldId = worldId;
-    } else {
-      const newWorld = await pool.query(
-        'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
-        [userId, title],
-      );
-      resultWorldId = newWorld.rows[0].world_id;
+    const existing = await pool.query('SELECT 1 FROM worlds WHERE world_id = $1 AND user_id = $2', [
+      worldId,
+      userId,
+    ]);
+    if (existing.rows.length === 0) {
+      throw new WorldNotFoundError();
     }
+    await pool.query('UPDATE worlds SET title = $1, updated_at = NOW() WHERE world_id = $2', [
+      title,
+      worldId,
+    ]);
+    return fetchWorldById(worldId);
   } else {
-    const newWorld = await pool.query(
+    const newWorld = await pool.query<WorldRow>(
       'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
       [userId, title],
     );
-    resultWorldId = newWorld.rows[0].world_id;
+    return fetchWorldById(newWorld.rows[0].world_id);
   }
-
-  return fetchWorldById(resultWorldId);
 }

@@ -9,6 +9,7 @@ const config: Config = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   clearMocks: true,
+  silent: false,
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
