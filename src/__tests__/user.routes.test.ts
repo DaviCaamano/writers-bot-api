@@ -15,6 +15,7 @@ const mockLogin = userService.login as jest.Mock;
 const mockCreateUser = userService.createUser as jest.Mock;
 const mockAddGenres = userService.addGenres as jest.Mock;
 const mockDeleteUser = userService.deleteUser as jest.Mock;
+const mockGetBillingHistory = userService.getBillingHistory as jest.Mock;
 
 const STRONG_PASSWORD = 'P@ssword123!';
 
@@ -184,6 +185,22 @@ describe('POST /user/deleteme', () => {
 
 // GET /users/billing-history/:userId
 describe('GET /users/billing-history/:userId', () => {
+  it('returns 200 with billing history for own account', async () => {
+    const headers = authHeaders(mockLoginResponse.userId);
+    const mockBilling = [
+      { billingId: 'bill-1', planType: 'pro-plan', isYearPlan: false, amountCents: 500, billedAt: new Date().toISOString() },
+    ];
+    mockGetBillingHistory.mockResolvedValueOnce(mockBilling);
+
+    const res = await request(app)
+      .get(`/users/billing-history/${mockLoginResponse.userId}`)
+      .set(headers);
+
+    expect(res.status).toBe(200);
+    expect(res.body.billingHistory).toEqual(mockBilling);
+    expect(mockGetBillingHistory).toHaveBeenCalledWith(mockLoginResponse.userId);
+  });
+
   it('returns 403 when requesting another users billing history', async () => {
     const headers = authHeaders(mockLoginResponse.userId);
     const otherUserId = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
