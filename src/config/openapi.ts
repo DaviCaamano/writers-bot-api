@@ -96,38 +96,68 @@ const UpsertWorldRequest = registry.register('UpsertWorldRequest', UpsertWorldSc
 const json = (schema: z.ZodTypeAny) => ({ content: { 'application/json': { schema } } });
 const secured = [{ bearerAuth: [] }];
 
-const err400 = { description: 'Validation error', content: { 'application/json': { schema: ErrorSchema } } };
-const err401 = { description: 'Unauthorized', content: { 'application/json': { schema: ErrorSchema } } };
-const err404 = { description: 'Not found', content: { 'application/json': { schema: ErrorSchema } } };
-const err500 = { description: 'Internal server error', content: { 'application/json': { schema: ErrorSchema } } };
+const err400 = {
+  description: 'Validation error',
+  content: { 'application/json': { schema: ErrorSchema } },
+};
+const err401 = {
+  description: 'Unauthorized',
+  content: { 'application/json': { schema: ErrorSchema } },
+};
+const err404 = {
+  description: 'Not found',
+  content: { 'application/json': { schema: ErrorSchema } },
+};
+const err500 = {
+  description: 'Internal server error',
+  content: { 'application/json': { schema: ErrorSchema } },
+};
 
 // ── User paths ────────────────────────────────────────────────────
 registry.registerPath({
-  method: 'post', path: '/user/login', tags: ['User'],
+  method: 'post',
+  path: '/user/login',
+  tags: ['User'],
   summary: 'Log in and receive a JWT',
   request: { body: json(LoginRequest) },
   responses: {
     200: { description: 'Login successful', ...json(LoginResponseSchema) },
-    400: err400, 401: err401, 500: err500,
+    400: err400,
+    401: err401,
+    500: err500,
   },
 });
 
 registry.registerPath({
-  method: 'post', path: '/user/logout', tags: ['User'],
+  method: 'post',
+  path: '/user/logout',
+  tags: ['User'],
   summary: 'Log out and revoke the current session token',
   security: secured,
-  responses: { 200: { description: 'Logged out', ...json(StatusOkSchema) }, 401: err401, 500: err500 },
+  responses: {
+    200: { description: 'Logged out', ...json(StatusOkSchema) },
+    401: err401,
+    500: err500,
+  },
 });
 
 registry.registerPath({
-  method: 'post', path: '/user/create', tags: ['User'],
+  method: 'post',
+  path: '/user/create',
+  tags: ['User'],
   summary: 'Create a new user account',
   request: { body: json(CreateUserRequest) },
-  responses: { 201: { description: 'User created', ...json(StatusOkSchema) }, 400: err400, 500: err500 },
+  responses: {
+    201: { description: 'User created', ...json(StatusOkSchema) },
+    400: err400,
+    500: err500,
+  },
 });
 
 registry.registerPath({
-  method: 'post', path: '/user', tags: ['User'],
+  method: 'post',
+  path: '/user',
+  tags: ['User'],
   summary: 'Update the authenticated user',
   security: secured,
   request: { body: json(UpdateUserRequest) },
@@ -135,25 +165,33 @@ registry.registerPath({
 });
 
 registry.registerPath({
-  method: 'post', path: '/user/genres', tags: ['User'],
+  method: 'post',
+  path: '/user/genres',
+  tags: ['User'],
   summary: 'Add genres to the authenticated user',
   security: secured,
   request: { body: json(GenresRequest) },
   responses: {
     200: { description: 'Genres added', ...json(z.object({ genres: z.array(z.string()) })) },
-    400: err400, 401: err401, 500: err500,
+    400: err400,
+    401: err401,
+    500: err500,
   },
 });
 
 registry.registerPath({
-  method: 'post', path: '/user/deleteme', tags: ['User'],
+  method: 'post',
+  path: '/user/deleteme',
+  tags: ['User'],
   summary: 'Permanently delete the authenticated user and all their data',
   security: secured,
   responses: { 200: { description: 'OK', ...json(StatusOkSchema) }, 401: err401 },
 });
 
 registry.registerPath({
-  method: 'get', path: '/users/billing-history/{userId}', tags: ['User'],
+  method: 'get',
+  path: '/users/billing-history/{userId}',
+  tags: ['User'],
   summary: 'Get billing history for a user (last 2 years)',
   security: secured,
   request: { params: z.object({ userId: z.uuid() }) },
@@ -161,36 +199,66 @@ registry.registerPath({
 });
 
 registry.registerPath({
-  method: 'post', path: '/user/subscribe', tags: ['User'],
+  method: 'post',
+  path: '/user/subscribe',
+  tags: ['User'],
   summary: 'Subscribe to a plan via Stripe',
   security: secured,
   request: { body: json(SubscribeRequest) },
-  responses: { 200: { description: 'Subscription created' }, 400: err400, 401: err401, 500: err500 },
+  responses: {
+    200: { description: 'Subscription created' },
+    400: err400,
+    401: err401,
+    500: err500,
+  },
 });
 
 // ── Story paths ───────────────────────────────────────────────────
 registry.registerPath({
-  method: 'post', path: '/story/document', tags: ['Story'],
+  method: 'post',
+  path: '/story/document',
+  tags: ['Story'],
   summary: 'Create or update a document',
   security: secured,
   request: { body: json(UpsertDocumentRequest) },
-  responses: { 200: { description: 'World containing the document', ...json(WorldSchema) }, 400: err400, 401: err401, 404: err404, 500: err500 },
+  responses: {
+    200: { description: 'World containing the document', ...json(WorldSchema) },
+    400: err400,
+    401: err401,
+    404: err404,
+    500: err500,
+  },
 });
 
 registry.registerPath({
-  method: 'post', path: '/story/story', tags: ['Story'],
+  method: 'post',
+  path: '/story/story',
+  tags: ['Story'],
   summary: 'Create or update a story',
   security: secured,
   request: { body: json(UpsertStoryRequest) },
-  responses: { 200: { description: 'World containing the story', ...json(WorldSchema) }, 400: err400, 401: err401, 404: err404, 500: err500 },
+  responses: {
+    200: { description: 'World containing the story', ...json(WorldSchema) },
+    400: err400,
+    401: err401,
+    404: err404,
+    500: err500,
+  },
 });
 
 registry.registerPath({
-  method: 'post', path: '/story/world', tags: ['Story'],
+  method: 'post',
+  path: '/story/world',
+  tags: ['Story'],
   summary: 'Create or update a world',
   security: secured,
   request: { body: json(UpsertWorldRequest) },
-  responses: { 200: { description: 'The world', ...json(WorldSchema) }, 400: err400, 401: err401, 500: err500 },
+  responses: {
+    200: { description: 'The world', ...json(WorldSchema) },
+    400: err400,
+    401: err401,
+    500: err500,
+  },
 });
 
 // ── Document generator ────────────────────────────────────────────
@@ -201,8 +269,8 @@ export function generateOpenApiDocument() {
     info: {
       title: 'Writers Bot API',
       version: '1.0.0',
-      description: 'Writing management platform — documents, stories, worlds, and billing.',
+      description: 'Writing management platform — documents, stories, and worlds.',
     },
-    servers: [{ url: process.env.API_URL ?? 'http://localhost:3000' }],
+    servers: [{ url: process.env.API_URL ?? 'http://localhost:3001' }],
   });
 }
