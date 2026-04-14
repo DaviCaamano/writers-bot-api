@@ -1,7 +1,3 @@
-import request from 'supertest';
-import jwt from 'jsonwebtoken';
-import app from '@/app';
-
 jest.mock('@/services/story.service');
 jest.mock('@/config/database', () => ({
   __esModule: true,
@@ -9,6 +5,9 @@ jest.mock('@/config/database', () => ({
 }));
 jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 
+import request from 'supertest';
+import jwt from 'jsonwebtoken';
+import app from '@/app';
 import * as storyService from '@/services/story.service';
 import pool from '@/config/database';
 
@@ -31,8 +30,7 @@ function authHeaders(userId = USER_ID) {
   return { Authorization: `Bearer ${token}` };
 }
 
-// ── POST /story/world ─────────────────────────────────────────────
-
+// POST /story/world
 describe('POST /story/world', () => {
   it('returns 401 without auth', async () => {
     const res = await request(app).post('/story/world').send({ title: 'My World' });
@@ -43,7 +41,7 @@ describe('POST /story/world', () => {
     const headers = authHeaders();
     const res = await request(app).post('/story/world').set(headers).send({});
     expect(res.status).toBe(400);
-    expect(res.body.details).toHaveProperty('title');
+    expect(res.body.details.properties).toHaveProperty('title');
   });
 
   it('returns 200 with the world', async () => {
@@ -70,8 +68,7 @@ describe('POST /story/world', () => {
   });
 });
 
-// ── POST /story/story ─────────────────────────────────────────────
-
+// POST /story/story
 describe('POST /story/story', () => {
   it('returns 400 when title is missing', async () => {
     const headers = authHeaders();
@@ -103,14 +100,13 @@ describe('POST /story/story', () => {
   });
 });
 
-// ── POST /story/document ──────────────────────────────────────────
-
+// POST /story/document
 describe('POST /story/document', () => {
   it('returns 400 when title is missing', async () => {
     const headers = authHeaders();
     const res = await request(app).post('/story/document').set(headers).send({ body: 'content' });
     expect(res.status).toBe(400);
-    expect(res.body.details).toHaveProperty('title');
+    expect(res.body.details.properties).toHaveProperty('title');
   });
 
   it('returns 200 on success', async () => {

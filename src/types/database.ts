@@ -1,5 +1,4 @@
-// ── Database row types ──────────────────────────────────────────
-
+// Database row types
 export interface UserRow {
   user_id: string;
   first_name: string;

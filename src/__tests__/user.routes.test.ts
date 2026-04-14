@@ -1,9 +1,15 @@
-import request from 'supertest';
-import app from '@/app';
-
 jest.mock('@/services/user.service');
+jest.mock('@/config/database', () => ({
+  __esModule: true,
+  default: { query: jest.fn(), connect: jest.fn() },
+}));
+jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 
+import request from 'supertest';
+import jwt from 'jsonwebtoken';
+import app from '@/app';
 import * as userService from '@/services/user.service';
+import pool from '@/config/database';
 
 const mockLogin = userService.login as jest.Mock;
 const mockCreateUser = userService.createUser as jest.Mock;
@@ -22,25 +28,13 @@ const mockLoginResponse = {
   token: 'mock-jwt-token',
 };
 
-// For authenticated routes we need a real JWT that passes the auth middleware.
-// Mock the database check in the middleware by also mocking the pool.
-jest.mock('@/config/database', () => ({
-  __esModule: true,
-  default: { query: jest.fn(), connect: jest.fn() },
-}));
-jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
-
-import pool from '@/config/database';
-import jwt from 'jsonwebtoken';
-
 function authHeaders(userId = mockLoginResponse.userId) {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '7d' });
   (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ user_id: userId }] });
   return { Authorization: `Bearer ${token}` };
 }
 
-// ── POST /user/create ────────────────────────────────────────────
-
+// POST /user/create
 describe('POST /user/create', () => {
   it('returns 400 when required fields are missing', async () => {
     const res = await request(app).post('/user/create').send({ email: 'bad' });
@@ -53,7 +47,7 @@ describe('POST /user/create', () => {
       firstName: 'Jane', lastName: 'Doe', email: 'not-an-email', password: STRONG_PASSWORD,
     });
     expect(res.status).toBe(400);
-    expect(res.body.details).toHaveProperty('email');
+    expect(res.body.details.properties).toHaveProperty('email');
   });
 
   it('returns 400 when password is too weak', async () => {
@@ -61,7 +55,7 @@ describe('POST /user/create', () => {
       firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com', password: 'short',
     });
     expect(res.status).toBe(400);
-    expect(res.body.details).toHaveProperty('password');
+    expect(res.body.details.properties).toHaveProperty('password');
   });
 
   it('returns 201 even when email is already registered (anti-enumeration)', async () => {
@@ -85,8 +79,7 @@ describe('POST /user/create', () => {
   });
 });
 
-// ── POST /user/login ─────────────────────────────────────────────
-
+// POST /user/login
 describe('POST /user/login', () => {
   it('returns 400 when body is invalid', async () => {
     const res = await request(app).post('/user/login').send({ email: 'not-an-email' });
@@ -124,8 +117,7 @@ describe('POST /user/login', () => {
   });
 });
 
-// ── POST /user/logout ────────────────────────────────────────────
-
+// POST /user/logout
 describe('POST /user/logout', () => {
   it('returns 401 without auth', async () => {
     const res = await request(app).post('/user/logout').send();
@@ -145,8 +137,7 @@ describe('POST /user/logout', () => {
   });
 });
 
-// ── POST /user/genres ────────────────────────────────────────────
-
+// POST /user/genres
 describe('POST /user/genres', () => {
   it('returns 401 without auth', async () => {
     const res = await request(app).post('/user/genres').send({ genres: ['Fantasy'] });
@@ -157,7 +148,7 @@ describe('POST /user/genres', () => {
     const headers = authHeaders();
     const res = await request(app).post('/user/genres').set(headers).send({ genres: 'Fantasy' });
     expect(res.status).toBe(400);
-    expect(res.body.details).toHaveProperty('genres');
+    expect(res.body.details.properties).toHaveProperty('genres');
   });
 
   it('returns 200 with updated genre list', async () => {
@@ -174,8 +165,7 @@ describe('POST /user/genres', () => {
   });
 });
 
-// ── POST /user/deleteme ─────────────────────────────────────────
-
+// POST /user/deleteme
 describe('POST /user/deleteme', () => {
   it('returns 401 without auth', async () => {
     const res = await request(app).post('/user/deleteme').send();
@@ -192,8 +182,7 @@ describe('POST /user/deleteme', () => {
   });
 });
 
-// ── GET /users/billing-history/:userId ──────────────────────────
-
+// GET /users/billing-history/:userId
 describe('GET /users/billing-history/:userId', () => {
   it('returns 403 when requesting another users billing history', async () => {
     const headers = authHeaders(mockLoginResponse.userId);

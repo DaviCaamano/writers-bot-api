@@ -1,5 +1,4 @@
-// ── API response types ──────────────────────────────────────────
-
+// API response types
 export interface DocumentResponse {
   documentId: string;
   storyId: string;

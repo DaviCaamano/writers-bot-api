@@ -15,13 +15,11 @@ import { PlanType } from '@/types/plan';
 
 const SALT_ROUNDS = 12;
 
-// ── Domain errors ────────────────────────────────────────────────
-
+// Domain errors
 export class InvalidCredentialsError extends Error {}
 export class EmailTakenError extends Error {}
 
-// ── Login ────────────────────────────────────────────────────────
-
+// Login
 export async function login(data: LoginBody) {
   const userResult = await pool.query<UserRow>('SELECT * FROM users WHERE email = $1', [
     data.email,
@@ -73,8 +71,7 @@ export async function login(data: LoginBody) {
   };
 }
 
-// ── Logout (revoke only the specific session token) ──────────────
-
+// Logout (revoke only the specific session token)
 export async function logout(token: string) {
   const result = await pool.query('DELETE FROM authentication WHERE token = $1 RETURNING user_id', [
     token,
@@ -84,8 +81,7 @@ export async function logout(token: string) {
   }
 }
 
-// ── Create user ──────────────────────────────────────────────────
-
+// Create user
 export async function createUser(data: CreateUserBody) {
   const existing = await pool.query('SELECT 1 FROM users WHERE email = $1', [data.email]);
   if (existing.rows.length > 0) throw new EmailTakenError();
@@ -99,8 +95,7 @@ export async function createUser(data: CreateUserBody) {
   logger.info({ email: data.email }, 'User account created');
 }
 
-// ── Update user ──────────────────────────────────────────────────
-
+// Update user
 export async function updateUser(userId: string, data: UpdateUserBody) {
   const client = await pool.connect();
   try {
@@ -170,8 +165,7 @@ export async function updateUser(userId: string, data: UpdateUserBody) {
   };
 }
 
-// ── Genres ───────────────────────────────────────────────────────
-
+// Genres
 export async function addGenres(userId: string, genres: string[]) {
   for (const genre of genres) {
     await pool.query(
@@ -186,8 +180,7 @@ export async function addGenres(userId: string, genres: string[]) {
   return result.rows.map((r) => r.genre as string);
 }
 
-// ── Billing history ──────────────────────────────────────────────
-
+// Billing history
 export async function getBillingHistory(userId: string) {
   const result = await pool.query<BillingRow>(
     `SELECT * FROM billing
@@ -205,16 +198,14 @@ export async function getBillingHistory(userId: string) {
   }));
 }
 
-// ── Delete user (GDPR / account deletion) ────────────────────────
-
+// Delete user (GDPR / account deletion)
 export async function deleteUser(userId: string) {
   // All related tables cascade-delete from users.user_id
   await pool.query('DELETE FROM users WHERE user_id = $1', [userId]);
   logger.info({ userId }, 'User account deleted');
 }
 
-// ── Subscribe ────────────────────────────────────────────────────
-
+// Subscribe
 export async function subscribe(userId: string, data: SubscribeBody) {
   const { planType, yearPlan, paymentMethodId } = data;
   const amountCents = await calculatePrice(userId, planType, yearPlan);
@@ -284,8 +275,7 @@ export async function subscribe(userId: string, data: SubscribeBody) {
   return { amountCents, planType, yearPlan };
 }
 
-// ── Private helpers ──────────────────────────────────────────────
-
+// Private helpers
 async function calculatePrice(
   userId: string,
   planType: PlanType,

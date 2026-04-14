@@ -1,7 +1,6 @@
 import { z } from '@/config/zod-extended';
 
-// ── Password strength schema (reused for creation & update) ────────
-
+// Password strength schema (reused for creation & update)
 const strongPassword = z
   .string()
   .min(12, 'Password must be at least 12 characters')
@@ -11,8 +10,7 @@ const strongPassword = z
   .regex(/[0-9]/, 'Password must contain a number')
   .regex(/[^A-Za-z0-9]/, 'Password must contain a special character');
 
-// ── Schemas ──────────────────────────────────────────────────────
-
+// Schemas
 export const LoginSchema = z.object({
   email: z.email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),

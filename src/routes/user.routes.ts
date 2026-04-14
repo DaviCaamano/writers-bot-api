@@ -37,8 +37,7 @@ import { AuthRequest } from '@/types/Request';
 
 const router = Router();
 
-// ── Login ────────────────────────────────────────────────────────
-
+// Login
 router.post(
   '/login',
   loginLimiter,
@@ -57,8 +56,7 @@ router.post(
   },
 );
 
-// ── Logout (revokes only the current session token) ──────────────
-
+// Logout (revokes only the current session token)
 router.post(
   '/logout',
   authMiddleware,
@@ -68,7 +66,7 @@ router.post(
   },
 );
 
-// ── Create account ───────────────────────────────────────────────
+// Create account
 // Returns the same response whether the email exists or not to prevent enumeration.
 
 router.post(
@@ -90,8 +88,7 @@ router.post(
   },
 );
 
-// ── Update user ──────────────────────────────────────────────────
-
+// Update user
 router.post(
   '/',
   authMiddleware,
@@ -103,8 +100,7 @@ router.post(
   },
 );
 
-// ── Add genres ───────────────────────────────────────────────────
-
+// Add genres
 router.post(
   '/genres',
   authMiddleware,
@@ -117,8 +113,7 @@ router.post(
   },
 );
 
-// ── Delete account ───────────────────────────────────────────────
-
+// Delete account
 router.post(
   '/deleteme',
   authMiddleware,
@@ -128,8 +123,7 @@ router.post(
   },
 );
 
-// ── Billing history (owner-only) ─────────────────────────────────
-
+// Billing history (owner-only)
 router.get(
   '/billing-history/:userId',
   authMiddleware,
@@ -148,8 +142,7 @@ router.get(
   },
 );
 
-// ── Subscribe ────────────────────────────────────────────────────
-
+// Subscribe
 router.post(
   '/subscribe',
   authMiddleware,

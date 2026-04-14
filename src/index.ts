@@ -3,7 +3,7 @@ dotenv.config();
 
 import logger from '@/config/logger';
 
-// ── Validate required environment variables at startup ───────────
+// Validate required environment variables at startup
 const required = ['DATABASE_URL', 'JWT_SECRET', 'STRIPE_SECRET_KEY'] as const;
 const missing = required.filter((key) => !process.env[key]);
 if (missing.length > 0) {

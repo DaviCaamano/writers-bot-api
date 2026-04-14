@@ -17,14 +17,14 @@ import {
 
 export const registry = new OpenAPIRegistry();
 
-// ── Security scheme ──────────────────────────────────────────────
+// Security scheme
 registry.registerComponent('securitySchemes', 'bearerAuth', {
   type: 'http',
   scheme: 'bearer',
   bearerFormat: 'JWT',
 });
 
-// ── Reusable response schemas ────────────────────────────────────
+// Reusable response schemas
 const StatusOkSchema = registry.register('StatusOk', z.object({ status: z.literal('ok') }));
 
 const ErrorSchema = registry.register(
@@ -83,7 +83,7 @@ const LoginResponseSchema = registry.register(
   }),
 );
 
-// ── Registered request schemas ───────────────────────────────────
+// Registered request schemas
 const LoginRequest = registry.register('LoginRequest', LoginSchema);
 const CreateUserRequest = registry.register('CreateUserRequest', CreateUserSchema);
 const UpdateUserRequest = registry.register('UpdateUserRequest', UpdateUserSchema);
@@ -113,7 +113,7 @@ const err500 = {
   content: { 'application/json': { schema: ErrorSchema } },
 };
 
-// ── User paths ────────────────────────────────────────────────────
+// User paths
 registry.registerPath({
   method: 'post',
   path: '/user/login',
@@ -213,7 +213,7 @@ registry.registerPath({
   },
 });
 
-// ── Story paths ───────────────────────────────────────────────────
+// Story paths
 registry.registerPath({
   method: 'post',
   path: '/story/document',
@@ -261,7 +261,7 @@ registry.registerPath({
   },
 });
 
-// ── Document generator ────────────────────────────────────────────
+// Document generator
 export function generateOpenApiDocument() {
   const generator = new OpenApiGeneratorV31(registry.definitions);
   return generator.generateDocument({

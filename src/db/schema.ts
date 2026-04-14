@@ -14,12 +14,10 @@ import {
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
-// ── Enums ────────────────────────────────────────────────────────────────────
-
+// Enums
 export const planTypeEnum = pgEnum('plan_type', ['pro-plan', 'max-plan']);
 
-// ── Users ────────────────────────────────────────────────────────────────────
-
+// Users
 export const users = pgTable('users', {
   userId: uuid('user_id').primaryKey().defaultRandom(),
   firstName: varchar('first_name', { length: 100 }).notNull(),
@@ -31,8 +29,7 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
-// ── Authentication ───────────────────────────────────────────────────────────
-
+// Authentication
 export const authentication = pgTable(
   'authentication',
   {
@@ -50,8 +47,7 @@ export const authentication = pgTable(
   ],
 );
 
-// ── Genres ───────────────────────────────────────────────────────────────────
-
+// Genres
 export const genres = pgTable(
   'genres',
   {
@@ -68,8 +64,7 @@ export const genres = pgTable(
   ],
 );
 
-// ── Worlds ───────────────────────────────────────────────────────────────────
-
+// Worlds
 export const worlds = pgTable(
   'worlds',
   {
@@ -84,8 +79,7 @@ export const worlds = pgTable(
   (t) => [index('idx_worlds_user_id').on(t.userId)],
 );
 
-// ── Stories ──────────────────────────────────────────────────────────────────
-
+// Stories
 export const stories = pgTable(
   'stories',
   {
@@ -100,8 +94,7 @@ export const stories = pgTable(
   (t) => [index('idx_stories_world_id').on(t.worldId)],
 );
 
-// ── Documents ────────────────────────────────────────────────────────────────
-
+// Documents
 export const documents = pgTable(
   'documents',
   {
@@ -129,8 +122,7 @@ export const documents = pgTable(
   ],
 );
 
-// ── Plans ────────────────────────────────────────────────────────────────────
-
+// Plans
 export const plans = pgTable(
   'plans',
   {
@@ -156,8 +148,7 @@ export const plans = pgTable(
   ],
 );
 
-// ── Billing ──────────────────────────────────────────────────────────────────
-
+// Billing
 export const billing = pgTable(
   'billing',
   {

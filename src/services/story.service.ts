@@ -9,8 +9,7 @@ export class WorldNotFoundError extends Error {}
 export class DocumentNotFoundError extends Error {}
 
 
-// ── Document ─────────────────────────────────────────────────────
-
+// Document
 export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
   const { documentId, title, body, storyId } = data;
 
@@ -99,8 +98,7 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
   });
 }
 
-// ── Story ────────────────────────────────────────────────────────
-
+// Story
 export async function upsertStory(userId: string, data: UpsertStoryBody) {
   const { storyId, title, worldId } = data;
 
@@ -163,8 +161,7 @@ export async function upsertStory(userId: string, data: UpsertStoryBody) {
   });
 }
 
-// ── World ────────────────────────────────────────────────────────
-
+// World
 export async function upsertWorld(userId: string, data: UpsertWorldBody) {
   const { worldId, title } = data;
 

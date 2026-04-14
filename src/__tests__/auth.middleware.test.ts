@@ -1,12 +1,12 @@
-import request from 'supertest';
-import jwt from 'jsonwebtoken';
-import app from '@/app';
-
 jest.mock('@/config/database', () => ({
   __esModule: true,
   default: { query: jest.fn(), connect: jest.fn() },
 }));
 jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
+
+import request from 'supertest';
+import jwt from 'jsonwebtoken';
+import app from '@/app';
 
 import pool from '@/config/database';
 const mockPool = pool as jest.Mocked<typeof pool>;
