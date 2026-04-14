@@ -44,9 +44,13 @@ describe('POST /story/world', () => {
     expect(res.body.details.properties).toHaveProperty('title');
   });
 
-  it('returns 200 with the world', async () => {
+  it('returns 200 when creating a new world', async () => {
     const headers = authHeaders();
-    mockUpsertWorld.mockResolvedValueOnce(mockWorld);
+    (pool.query as jest.Mock)
+      // Mock First Query - retrieve existing world => no existing world
+      .mockResolvedValueOnce({ rows: [] })
+      // Mock subsequent Insert Query
+      .mockResolvedValueOnce({ rows: [ { world_id: WORLD_ID }] });
 
     const res = await request(app).post('/story/world').set(headers).send({ title: 'My World' });
 
@@ -57,6 +61,7 @@ describe('POST /story/world', () => {
 
   it('returns 200 when updating an existing world', async () => {
     const headers = authHeaders();
+    // Mock world already exists
     mockUpsertWorld.mockResolvedValueOnce({ ...mockWorld, title: 'Updated World' });
 
     const res = await request(app)
