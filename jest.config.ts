@@ -5,6 +5,9 @@ const config: Config = {
   testEnvironment: 'node',
   testMatch: ['**/src/__tests__/**/*.test.ts'],
   setupFiles: ['./src/__tests__/setup.ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
   clearMocks: true,
   collectCoverageFrom: [
     'src/**/*.ts',

@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import pool from '../config/database';
-import { AuthRequest } from '../types/Request';
+import pool from '@/config/database';
+import { AuthRequest } from '@/types/Request';
 
 export const authMiddleware = async (
   req: AuthRequest,

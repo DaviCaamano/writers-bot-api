@@ -1,6 +1,6 @@
-import pool from '../config/database';
-import { DocumentRow, StoryRow, WorldRow } from '../types/database';
-import { DocumentResponse, StoryResponse, WorldResponse } from '../types/response';
+import pool from '@/config/database';
+import { DocumentRow, StoryRow, WorldRow } from '@/types/database';
+import { DocumentResponse, StoryResponse, WorldResponse } from '@/types/response';
 
 function mapDocument(row: DocumentRow): DocumentResponse {
   return {

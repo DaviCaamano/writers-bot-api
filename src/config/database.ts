@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import logger from './logger';
+import logger from '@/config/logger';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {

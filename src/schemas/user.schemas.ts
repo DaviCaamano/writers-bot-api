@@ -1,4 +1,4 @@
-import { z } from '../config/zod-extended';
+import { z } from '@/config/zod-extended';
 
 // ── Password strength schema (reused for creation & update) ────────
 

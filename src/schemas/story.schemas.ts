@@ -1,4 +1,4 @@
-import { z } from '../config/zod-extended';
+import { z } from '@/config/zod-extended';
 
 export const UpsertDocumentSchema = z.object({
   documentId: z.uuid('documentId must be a valid UUID').optional(),

@@ -1,16 +1,16 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import app from '../app';
+import app from '@/app';
 
-jest.mock('../services/story.service');
-jest.mock('../config/database', () => ({
+jest.mock('@/services/story.service');
+jest.mock('@/config/database', () => ({
   __esModule: true,
   default: { query: jest.fn(), connect: jest.fn() },
 }));
-jest.mock('../config/stripe', () => ({ __esModule: true, default: {} }));
+jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 
-import * as storyService from '../services/story.service';
-import pool from '../config/database';
+import * as storyService from '@/services/story.service';
+import pool from '@/config/database';
 
 const mockUpsertDocument = storyService.upsertDocument as jest.Mock;
 const mockUpsertStory = storyService.upsertStory as jest.Mock;

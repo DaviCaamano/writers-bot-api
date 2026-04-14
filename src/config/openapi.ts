@@ -1,19 +1,19 @@
 import { OpenAPIRegistry, OpenApiGeneratorV31 } from '@asteasolutions/zod-to-openapi';
 // Import from zod-extended so the Zod factory methods are already wrapped by
 // extendZodWithOpenApi before any schema passed to registry.register() is created.
-import { z } from './zod-extended';
+import { z } from '@/config/zod-extended';
 import {
   LoginSchema,
   CreateUserSchema,
   UpdateUserSchema,
   GenresSchema,
   SubscribeSchema,
-} from '../schemas/user.schemas';
+} from '@/schemas/user.schemas';
 import {
   UpsertDocumentSchema,
   UpsertStorySchema,
   UpsertWorldSchema,
-} from '../schemas/story.schemas';
+} from '@/schemas/story.schemas';
 
 export const registry = new OpenAPIRegistry();
 

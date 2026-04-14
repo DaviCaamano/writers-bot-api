@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import logger from './config/logger';
+import logger from '@/config/logger';
 
 // ── Validate required environment variables at startup ───────────
 const required = ['DATABASE_URL', 'JWT_SECRET', 'STRIPE_SECRET_KEY'] as const;
@@ -12,7 +12,7 @@ if (missing.length > 0) {
 }
 
 // Import app AFTER dotenv + validation so config modules see the env vars
-import app from './app';
+import app from '@/app';
 
 const PORT = process.env.PORT || 3000;
 

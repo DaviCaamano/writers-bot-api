@@ -1,8 +1,8 @@
-import pool from '../config/database';
-import { fetchWorldById } from '../utils/legacy';
-import type { UpsertDocumentBody, UpsertStoryBody, UpsertWorldBody } from '../schemas/story.schemas';
-import { withTransaction } from '../utils/withTransaction';
-import { DocumentRow, StoryRow } from '../types/database';
+import pool from '@/config/database';
+import { fetchWorldById } from '@/utils/legacy';
+import type { UpsertDocumentBody, UpsertStoryBody, UpsertWorldBody } from '@/schemas/story.schemas';
+import { withTransaction } from '@/utils/withTransaction';
+import { DocumentRow, StoryRow } from '@/types/database';
 
 export class StoryNotFoundError extends Error {}
 export class WorldNotFoundError extends Error {}

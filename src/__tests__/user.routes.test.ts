@@ -1,9 +1,9 @@
 import request from 'supertest';
-import app from '../app';
+import app from '@/app';
 
-jest.mock('../services/user.service');
+jest.mock('@/services/user.service');
 
-import * as userService from '../services/user.service';
+import * as userService from '@/services/user.service';
 
 const mockLogin = userService.login as jest.Mock;
 const mockCreateUser = userService.createUser as jest.Mock;
@@ -24,13 +24,13 @@ const mockLoginResponse = {
 
 // For authenticated routes we need a real JWT that passes the auth middleware.
 // Mock the database check in the middleware by also mocking the pool.
-jest.mock('../config/database', () => ({
+jest.mock('@/config/database', () => ({
   __esModule: true,
   default: { query: jest.fn(), connect: jest.fn() },
 }));
-jest.mock('../config/stripe', () => ({ __esModule: true, default: {} }));
+jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 
-import pool from '../config/database';
+import pool from '@/config/database';
 import jwt from 'jsonwebtoken';
 
 function authHeaders(userId = mockLoginResponse.userId) {

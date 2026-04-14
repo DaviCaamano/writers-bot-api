@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../middleware/auth';
-import { validate, validateParams } from '../middleware/validate';
+import { authMiddleware } from '@/middleware/auth';
+import { validate, validateParams } from '@/middleware/validate';
 import {
   loginLimiter,
   createAccountLimiter,
   subscribeLimiter,
   generalLimiter,
-} from '../config/rateLimiters';
+} from '@/config/rateLimiters';
 import {
   LoginSchema,
   LoginBody,
@@ -20,7 +20,7 @@ import {
   BillingHistoryParams,
   SubscribeSchema,
   SubscribeBody,
-} from '../schemas/user.schemas';
+} from '@/schemas/user.schemas';
 import {
   login,
   logout,
@@ -32,8 +32,8 @@ import {
   subscribe,
   InvalidCredentialsError,
   EmailTakenError,
-} from '../services/user.service';
-import { AuthRequest } from '../types/Request';
+} from '@/services/user.service';
+import { AuthRequest } from '@/types/Request';
 
 const router = Router();
 

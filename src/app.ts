@@ -2,10 +2,10 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
-import logger from './config/logger';
-import userRoutes from './routes/user.routes';
-import storyRoutes from './routes/story.routes';
-import docsRoutes from './routes/docs.routes';
+import logger from '@/config/logger';
+import userRoutes from '@/routes/user.routes';
+import storyRoutes from '@/routes/story.routes';
+import docsRoutes from '@/routes/docs.routes';
 
 const app = express();
 

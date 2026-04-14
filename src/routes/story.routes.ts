@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
-import { authMiddleware } from '../middleware/auth';
-import { validate } from '../middleware/validate';
-import { generalLimiter } from '../config/rateLimiters';
+import { authMiddleware } from '@/middleware/auth';
+import { validate } from '@/middleware/validate';
+import { generalLimiter } from '@/config/rateLimiters';
 import {
   UpsertDocumentSchema,
   UpsertDocumentBody,
@@ -9,15 +9,15 @@ import {
   UpsertStoryBody,
   UpsertWorldSchema,
   UpsertWorldBody,
-} from '../schemas/story.schemas';
+} from '@/schemas/story.schemas';
 import {
   upsertDocument,
   upsertStory,
   upsertWorld,
   StoryNotFoundError,
   WorldNotFoundError,
-} from '../services/story.service';
-import { AuthRequest } from '../types/Request';
+} from '@/services/story.service';
+import { AuthRequest } from '@/types/Request';
 
 const router = Router();
 
