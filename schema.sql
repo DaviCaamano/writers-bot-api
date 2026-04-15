@@ -86,14 +86,21 @@ CREATE INDEX idx_worlds_user_id ON worlds(user_id);
 -- =============================================================
 
 CREATE TABLE stories (
-    story_id    UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    world_id    UUID        NOT NULL REFERENCES worlds(world_id) ON DELETE CASCADE,
-    title       VARCHAR(500) NOT NULL,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    story_id        UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    world_id        UUID        NOT NULL REFERENCES worlds(world_id) ON DELETE CASCADE,
+    title           VARCHAR(500) NOT NULL,
+    predecessor_id  UUID        REFERENCES stories(story_id) ON DELETE SET NULL,
+    successor_id    UUID        REFERENCES stories(story_id) ON DELETE SET NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_story_no_self_predecessor CHECK (predecessor_id <> story_id),
+    CONSTRAINT chk_story_no_self_successor   CHECK (successor_id   <> story_id)
 );
 
-CREATE INDEX idx_stories_world_id ON stories(world_id);
+CREATE INDEX idx_stories_world_id       ON stories(world_id);
+CREATE INDEX idx_stories_predecessor_id ON stories(predecessor_id);
+CREATE INDEX idx_stories_successor_id   ON stories(successor_id);
 
 
 -- =============================================================

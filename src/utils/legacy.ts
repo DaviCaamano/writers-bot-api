@@ -1,6 +1,7 @@
 import pool from '@/config/database';
 import { DocumentRow, StoryRow, WorldRow } from '@/types/database';
 import { DocumentResponse, StoryResponse, WorldResponse } from '@/types/response';
+import { orderLinkedDocs } from '@/utils/orderLinkedDocs';
 
 function mapDocumentResponse(row: DocumentRow): DocumentResponse {
   return {
@@ -20,7 +21,9 @@ function mapStoryResponse(row: StoryRow, documents: DocumentResponse[]): StoryRe
     storyId: row.story_id,
     worldId: row.world_id,
     title: row.title,
-    documents,
+    predecessorId: row.predecessor_id,
+    successorId: row.successor_id,
+    documents: orderLinkedDocs(documents, (doc) => doc.documentId),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -31,7 +34,7 @@ function mapWorldResponse(row: WorldRow, stories: StoryResponse[]): WorldRespons
     worldId: row.world_id,
     userId: row.user_id,
     title: row.title,
-    stories,
+    stories: orderLinkedDocs(stories, (doc) => doc.storyId),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

@@ -88,10 +88,22 @@ export const stories = pgTable(
       .notNull()
       .references(() => worlds.worldId, { onDelete: 'cascade' }),
     title: varchar('title', { length: 500 }).notNull(),
+    predecessorId: uuid('predecessor_id').references((): PgColumn => stories.storyId, {
+      onDelete: 'set null',
+    }),
+    successorId: uuid('successor_id').references((): PgColumn => stories.storyId, {
+      onDelete: 'set null',
+    }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('idx_stories_world_id').on(t.worldId)],
+  (t) => [
+    index('idx_stories_world_id').on(t.worldId),
+    index('idx_stories_predecessor_id').on(t.predecessorId),
+    index('idx_stories_successor_id').on(t.successorId),
+    check('chk_story_no_self_predecessor', sql`${t.predecessorId} <> ${t.storyId}`),
+    check('chk_story_no_self_successor', sql`${t.successorId} <> ${t.storyId}`),
+  ],
 );
 
 // Documents

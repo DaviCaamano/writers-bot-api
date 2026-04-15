@@ -29,6 +29,8 @@ export interface StoryRow {
   story_id: string;
   world_id: string;
   title: string;
+  predecessor_id: string | null;
+  successor_id: string | null;
   created_at: Date;
   updated_at: Date;
 }

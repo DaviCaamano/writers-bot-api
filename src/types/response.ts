@@ -14,6 +14,8 @@ export interface StoryResponse {
   storyId: string;
   worldId: string;
   title: string;
+  predecessorId: string | null;
+  successorId: string | null;
   documents: DocumentResponse[];
   createdAt: Date;
   updatedAt: Date;
