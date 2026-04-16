@@ -1,7 +1,7 @@
 import type { UpsertStoryBody } from '@/schemas/story.schemas';
 import { withTransaction } from '@/utils/database/with-transaction';
 import { StoryRow, StoryRowWithDocuments } from '@/types/database';
-import { WorldNotFoundError } from '@/utils/error/custom-errors';
+import { WorldNotFoundError } from '@/constants/error/custom-errors';
 import { withQuery } from '@/utils/database/with-query';
 import { StoryResponse } from '@/types/response';
 import { mapStoryResponse } from '@/utils/story/map-story';

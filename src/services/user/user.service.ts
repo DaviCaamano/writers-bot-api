@@ -2,19 +2,12 @@ import bcrypt from 'bcrypt';
 import pool from '@/config/database';
 import stripe from '@/config/stripe';
 import logger from '@/config/logger';
-import type {
-  CreateUserBody,
-  UpdateUserBody,
-  SubscribeBody,
-} from '@/schemas/user.schemas';
+import type { CreateUserBody, UpdateUserBody, SubscribeBody } from '@/schemas/user.schemas';
 import { PlanRow, UserRow } from '@/types/database';
 import { PlanType } from '@/types/plan';
+import { EmailTakenError } from '@/constants/error/custom-errors';
 
 const SALT_ROUNDS = 12;
-
-// Domain errors
-export class InvalidCredentialsError extends Error {}
-export class EmailTakenError extends Error {}
 
 // Create user
 export async function createUser(data: CreateUserBody) {

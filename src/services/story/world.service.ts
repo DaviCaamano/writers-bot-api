@@ -1,4 +1,4 @@
-import { WorldNotFoundError } from '@/utils/error/custom-errors';
+import { WorldNotFoundError } from '@/constants/error/custom-errors';
 import { UpsertWorldBody } from '@/schemas/story.schemas';
 import { WorldResponse } from '@/types/response';
 import pool from '@/config/database';

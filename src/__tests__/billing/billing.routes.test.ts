@@ -28,9 +28,7 @@ describe('GET /users/history/:userId', () => {
     ];
     mockGetBillingHistory.mockResolvedValueOnce(mockBilling);
 
-    const res = await request(app)
-      .get(`/billing/history/${mockLoginResponse.userId}`)
-      .set(headers);
+    const res = await request(app).get(`/billing/history/${mockLoginResponse.userId}`).set(headers);
 
     expect(res.status).toBe(200);
     expect(res.body.billingHistory).toEqual(mockBilling);

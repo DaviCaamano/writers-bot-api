@@ -1,4 +1,4 @@
-import { WorldNotFoundError } from '@/utils/error/custom-errors';
+import { WorldNotFoundError } from '@/constants/error/custom-errors';
 
 jest.mock('@/utils/database/with-transaction');
 jest.mock('@/utils/database/with-query');

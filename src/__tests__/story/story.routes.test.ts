@@ -1,4 +1,4 @@
-import { StoryNotFoundError, WorldNotFoundError } from '@/utils/error/custom-errors';
+import { StoryNotFoundError, WorldNotFoundError } from '@/constants/error/custom-errors';
 
 jest.mock('@/services/story/story.service');
 jest.mock('@/services/story/document.service');

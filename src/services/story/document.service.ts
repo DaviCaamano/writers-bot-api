@@ -1,7 +1,7 @@
 import { DocumentRow, StoryRow } from '@/types/database';
 import { UpsertDocumentBody } from '@/schemas/story.schemas';
 import { withTransaction } from '@/utils/database/with-transaction';
-import { DocumentNotFoundError, StoryNotFoundError } from '@/utils/error/custom-errors';
+import { DocumentNotFoundError, StoryNotFoundError } from '@/constants/error/custom-errors';
 import { withQuery } from '@/utils/database/with-query';
 import { DocumentResponse } from '@/types/response';
 import { fetchWorld } from '@/services/story/world.service';

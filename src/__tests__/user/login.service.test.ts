@@ -1,74 +1,48 @@
-jest.mock('@/services/user/login.service');
 jest.mock('@/config/database', () => ({
   __esModule: true,
   default: { query: jest.fn(), connect: jest.fn() },
 }));
-jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
+jest.mock('@/utils/database/with-query');
+jest.mock('@/utils/story/world');
+jest.mock('bcrypt');
+jest.mock('jsonwebtoken');
 
-import request from 'supertest';
-import app from '@/app';
-import * as loginService from '@/services/user/login.service';
-import * as userService from '@/services/user/user.service';
-import { mockLoginResponse } from '@/__tests__/constants/mock-login';
-import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
+import { withQuery } from '@/utils/database/with-query';
+import { fetchLegacy } from '@/utils/story/world';
+import { login } from '@/services/user/login.service';
+import {
+  mockLoginEmail,
+  mockLoginResponse,
+  mockLoginToken,
+  mockStrongPassword,
+  mockUser,
+} from '@/__tests__/constants/mock-login';
+import { PoolClient } from 'pg';
+import { createMockClient } from '@/__tests__/constants/mock-database';
+import { mockLegacy } from '@/__tests__/constants/mock-story';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-const STRONG_PASSWORD = 'P@ssword123!';
-const mockLogin = loginService.login as jest.Mock;
-const mockLogout = loginService.logout as jest.Mock;
+const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
+const mockFetchLegacy = fetchLegacy as jest.MockedFunction<typeof fetchLegacy>;
 
-describe('POST /user/login', () => {
-  it('returns 400 when body is invalid', async () => {
-    const res = await request(app).post('/user/login').send({ email: 'not-an-email' });
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBe('Validation failed');
-  });
+describe('login', () => {
+  it('should return a user object with the correct properties', async () => {
+    const mockClient = createMockClient();
+    mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+    mockClient.query
+      .mockResolvedValueOnce({ rows: [mockUser] })
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ rows: [{ plan_type: 'pro-plan' }] });
+    mockFetchLegacy.mockImplementation(async () => mockLegacy);
+    (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+    (jwt.sign as jest.Mock).mockReturnValueOnce(mockLoginToken);
 
-  it('returns 401 on invalid credentials', async () => {
-    mockLogin.mockRejectedValueOnce(new userService.InvalidCredentialsError());
-
-    const res = await request(app).post('/user/login').send({
-      email: 'unknown@example.com',
-      password: STRONG_PASSWORD,
+    const response = await login({
+      email: mockLoginEmail,
+      password: mockStrongPassword,
     });
-    expect(res.status).toBe(401);
-    expect(res.body.error).toBe('Invalid email or password');
-  });
 
-  it('returns 200 with user data on success', async () => {
-    mockLogin.mockResolvedValueOnce(mockLoginResponse);
-
-    const res = await request(app).post('/user/login').send({
-      email: 'jane@example.com',
-      password: STRONG_PASSWORD,
-    });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      email: 'jane@example.com',
-      userId: mockLoginResponse.userId,
-      firstName: 'Jane',
-      lastName: 'Doe',
-      token: 'mock-jwt-token',
-      plan: null,
-      legacy: [],
-    });
-  });
-});
-
-describe('POST /user/logout', () => {
-  it('returns 401 without auth', async () => {
-    const res = await request(app).post('/user/logout').send();
-    expect(res.status).toBe(401);
-  });
-
-  it('returns 200 and calls logout with the token', async () => {
-    mockLogout.mockResolvedValueOnce(undefined);
-
-    const headers = mockAuthHeaders();
-    const res = await request(app).post('/user/logout').set(headers).send();
-    expect(res.status).toBe(200);
-    expect(res.body.status).toBe('ok');
-    // Verify logout was called with a token string (not a userId)
-    expect(mockLogout).toHaveBeenCalledWith(expect.any(String));
+    expect(response).toMatchObject(mockLoginResponse);
   });
 });

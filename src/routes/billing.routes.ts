@@ -1,4 +1,3 @@
-
 import { getBillingHistory } from '@/services/billing/billing.service';
 import { authMiddleware } from '@/middleware/auth';
 import { Router, Response } from 'express';

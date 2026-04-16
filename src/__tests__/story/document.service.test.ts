@@ -1,7 +1,7 @@
 import { withTransaction } from '@/utils/database/with-transaction';
 import { withQuery } from '@/utils/database/with-query';
 import { fetchDocument, upsertDocument } from '@/services/story/document.service';
-import { StoryNotFoundError } from '@/utils/error/custom-errors';
+import { StoryNotFoundError } from '@/constants/error/custom-errors';
 import { fetchWorld } from '@/services/story/world.service';
 import {
   MOCK_DOC_ID,

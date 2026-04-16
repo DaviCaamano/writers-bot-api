@@ -70,10 +70,12 @@ describe('Auth Middleware', () => {
       const userId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
       const token = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '7d' });
 
-      // auth middleware query: token found in DB
-      (mockPool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ user_id: userId }] }) // auth check
-        .mockResolvedValueOnce({ rows: [] }); // DELETE in logout handler
+      // auth middleware uses pool.query directly; logout handler uses withQuery (pool.connect)
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ user_id: userId }] });
+      (mockPool.connect as jest.Mock).mockResolvedValueOnce({
+        query: jest.fn().mockResolvedValueOnce({ rows: [] }),
+        release: jest.fn(),
+      });
 
       const res = await request(app)
         .post('/user/logout')

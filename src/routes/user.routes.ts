@@ -25,11 +25,10 @@ import {
   addGenres,
   deleteUser,
   subscribe,
-  InvalidCredentialsError,
-  EmailTakenError,
 } from '@/services/user/user.service';
 import { AuthRequest } from '@/types/request';
 import { login, logout } from '@/services/user/login.service';
+import { EmailTakenError, InvalidCredentialsError } from '@/constants/error/custom-errors';
 
 const router = Router();
 

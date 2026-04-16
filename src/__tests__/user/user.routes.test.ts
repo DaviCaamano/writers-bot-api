@@ -1,3 +1,4 @@
+import { EmailTakenError } from '@/constants/error/custom-errors';
 
 jest.mock('@/services/user/user.service');
 jest.mock('@/config/database', () => ({
@@ -10,12 +11,11 @@ import request from 'supertest';
 import app from '@/app';
 import * as userService from '@/services/user/user.service';
 import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
+import { mockStrongPassword } from '@/__tests__/constants/mock-login';
 
 const mockCreateUser = userService.createUser as jest.Mock;
 const mockAddGenres = userService.addGenres as jest.Mock;
 const mockDeleteUser = userService.deleteUser as jest.Mock;
-
-const STRONG_PASSWORD = 'P@ssword123!';
 
 const mockLoginResponse = {
   email: 'jane@example.com',
@@ -40,7 +40,7 @@ describe('POST /user/create', () => {
       firstName: 'Jane',
       lastName: 'Doe',
       email: 'not-an-email',
-      password: STRONG_PASSWORD,
+      password: mockStrongPassword,
     });
     expect(res.status).toBe(400);
     expect(res.body.details.properties).toHaveProperty('email');
@@ -58,13 +58,13 @@ describe('POST /user/create', () => {
   });
 
   it('returns 201 even when email is already registered (anti-enumeration)', async () => {
-    mockCreateUser.mockRejectedValueOnce(new userService.EmailTakenError());
+    mockCreateUser.mockRejectedValueOnce(new EmailTakenError());
 
     const res = await request(app).post('/user/create').send({
       firstName: 'Jane',
       lastName: 'Doe',
       email: 'jane@example.com',
-      password: STRONG_PASSWORD,
+      password: mockStrongPassword,
     });
     expect(res.status).toBe(201);
     expect(res.body.status).toBe('ok');
@@ -77,7 +77,7 @@ describe('POST /user/create', () => {
       firstName: 'Jane',
       lastName: 'Doe',
       email: 'jane@example.com',
-      password: STRONG_PASSWORD,
+      password: mockStrongPassword,
     });
     expect(res.status).toBe(201);
     expect(res.body.status).toBe('ok');

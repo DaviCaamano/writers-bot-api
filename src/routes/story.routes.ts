@@ -13,7 +13,7 @@ import {
 import { upsertStory } from '@/services/story/story.service';
 import { AuthRequest } from '@/types/request';
 import { upsertDocument } from '@/services/story/document.service';
-import { StoryNotFoundError, WorldNotFoundError } from '@/utils/error/custom-errors';
+import { StoryNotFoundError, WorldNotFoundError } from '@/constants/error/custom-errors';
 import { upsertWorld } from '@/services/story/world.service';
 
 const router = Router();
