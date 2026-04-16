@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '@/middleware/auth';
-import { validate, validateParams } from '@/middleware/validate';
+import { validate } from '@/middleware/validate';
 import {
   loginLimiter,
   createAccountLimiter,
@@ -16,24 +16,20 @@ import {
   UpdateUserBody,
   GenresSchema,
   GenresBody,
-  BillingHistoryParamsSchema,
-  BillingHistoryParams,
   SubscribeSchema,
   SubscribeBody,
 } from '@/schemas/user.schemas';
 import {
-  login,
-  logout,
   createUser,
   updateUser,
   addGenres,
-  getBillingHistory,
   deleteUser,
   subscribe,
   InvalidCredentialsError,
   EmailTakenError,
 } from '@/services/user/user.service';
 import { AuthRequest } from '@/types/request';
+import { login, logout } from '@/services/user/login.service';
 
 const router = Router();
 
@@ -114,25 +110,6 @@ router.post('/deleteme', authMiddleware, async (req: AuthRequest, res: Response)
   await deleteUser(req.userId!);
   res.json({ status: 'ok' });
 });
-
-// Billing history (owner-only)
-router.get(
-  '/billing-history/:userId',
-  authMiddleware,
-  generalLimiter,
-  validateParams(BillingHistoryParamsSchema),
-  async (req: AuthRequest, res: Response): Promise<void> => {
-    const params = req.params as BillingHistoryParams;
-
-    // Ensure the authenticated user can only access their own billing history
-    if (req.userId !== params.userId) {
-      res.status(403).json({ error: 'Forbidden' });
-      return;
-    }
-    const result = await getBillingHistory(params.userId);
-    res.json({ billingHistory: result });
-  },
-);
 
 // Subscribe
 router.post(

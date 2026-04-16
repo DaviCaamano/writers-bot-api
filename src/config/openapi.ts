@@ -190,7 +190,7 @@ registry.registerPath({
 
 registry.registerPath({
   method: 'get',
-  path: '/users/billing-history/{userId}',
+  path: '/users/history/{userId}',
   tags: ['User'],
   summary: 'Get billing history for a user (last 2 years)',
   security: secured,

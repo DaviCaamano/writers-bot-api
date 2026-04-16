@@ -6,6 +6,7 @@ import logger from '@/config/logger';
 import userRoutes from '@/routes/user.routes';
 import storyRoutes from '@/routes/story.routes';
 import docsRoutes from '@/routes/docs.routes';
+import billingRoutes from '@/routes/billing.routes';
 
 const app = express();
 
@@ -46,10 +47,10 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Routes
-app.use('/user', userRoutes);
-app.use('/users', userRoutes); // also mounts billing-history under /users
-app.use('/story', storyRoutes);
+app.use('/billing', billingRoutes);
 app.use('/docs', docsRoutes);
+app.use('/story', storyRoutes);
+app.use('/user', userRoutes);
 
 // Health check
 app.get('/health', (_req, res) => {
