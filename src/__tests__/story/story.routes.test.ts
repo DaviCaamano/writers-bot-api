@@ -1,8 +1,8 @@
 import { StoryNotFoundError, WorldNotFoundError } from '@/utils/error/custom-errors';
 
-jest.mock('@/services/story.service');
-jest.mock('@/services/document.service');
-jest.mock('@/services/world.service');
+jest.mock('@/services/story/story.service');
+jest.mock('@/services/story/document.service');
+jest.mock('@/services/story/world.service');
 jest.mock('@/config/database', () => ({
   __esModule: true,
   default: { query: jest.fn(), connect: jest.fn() },
@@ -12,9 +12,9 @@ jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import app from '@/app';
-import * as documentService from '@/services/document.service';
-import * as storyService from '@/services/story.service';
-import * as worldService from '@/services/world.service';
+import * as documentService from '@/services/story/document.service';
+import * as storyService from '@/services/story/story.service';
+import * as worldService from '@/services/story/world.service';
 import pool from '@/config/database';
 
 const mockUpsertDocument = documentService.upsertDocument as jest.Mock;

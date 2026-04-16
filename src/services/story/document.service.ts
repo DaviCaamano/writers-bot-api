@@ -4,7 +4,7 @@ import { withTransaction } from '@/utils/database/with-transaction';
 import { DocumentNotFoundError, StoryNotFoundError } from '@/utils/error/custom-errors';
 import { withQuery } from '@/utils/database/with-query';
 import { DocumentResponse } from '@/types/response';
-import { fetchWorld } from '@/services/world.service';
+import { fetchWorld } from '@/services/story/world.service';
 
 export async function fetchDocument(documentId: string): Promise<DocumentResponse> {
   return withQuery<DocumentResponse>(async (client) => {

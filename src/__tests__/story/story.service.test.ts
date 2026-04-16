@@ -3,7 +3,7 @@ import { WorldNotFoundError } from '@/utils/error/custom-errors';
 jest.mock('@/utils/database/with-transaction');
 jest.mock('@/utils/database/with-query');
 
-import { upsertStory, fetchStory, fetchStoryWithDocuments } from '@/services/story.service';
+import { upsertStory, fetchStory, fetchStoryWithDocuments } from '@/services/story/story.service';
 import { withTransaction } from '@/utils/database/with-transaction';
 import { withQuery } from '@/utils/database/with-query';
 import {

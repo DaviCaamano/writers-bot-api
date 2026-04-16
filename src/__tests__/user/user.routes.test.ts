@@ -1,4 +1,4 @@
-jest.mock('@/services/user.service');
+jest.mock('@/services/user/user.service');
 jest.mock('@/config/database', () => ({
   __esModule: true,
   default: { query: jest.fn(), connect: jest.fn() },
@@ -8,7 +8,7 @@ jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import app from '@/app';
-import * as userService from '@/services/user.service';
+import * as userService from '@/services/user/user.service';
 import pool from '@/config/database';
 
 const mockLogin = userService.login as jest.Mock;

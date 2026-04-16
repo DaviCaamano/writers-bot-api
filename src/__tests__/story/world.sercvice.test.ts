@@ -13,7 +13,7 @@ import {
 jest.mock('@/config/database');
 
 import { WorldNotFoundError } from '@/utils/error/custom-errors';
-import { fetchWorld, upsertWorld } from '@/services/world.service';
+import { fetchWorld, upsertWorld } from '@/services/story/world.service';
 import { DocumentRow, StoryRow } from '@/types/database';
 import { mockPool } from '@/__tests__/constants/mock-database';
 

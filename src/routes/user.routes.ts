@@ -32,7 +32,7 @@ import {
   subscribe,
   InvalidCredentialsError,
   EmailTakenError,
-} from '@/services/user.service';
+} from '@/services/user/user.service';
 import { AuthRequest } from '@/types/request';
 
 const router = Router();

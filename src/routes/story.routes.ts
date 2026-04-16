@@ -10,11 +10,11 @@ import {
   UpsertWorldSchema,
   UpsertWorldBody,
 } from '@/schemas/story.schemas';
-import { upsertStory } from '@/services/story.service';
+import { upsertStory } from '@/services/story/story.service';
 import { AuthRequest } from '@/types/request';
-import { upsertDocument } from '@/services/document.service';
+import { upsertDocument } from '@/services/story/document.service';
 import { StoryNotFoundError, WorldNotFoundError } from '@/utils/error/custom-errors';
-import { upsertWorld } from '@/services/world.service';
+import { upsertWorld } from '@/services/story/world.service';
 
 const router = Router();
 

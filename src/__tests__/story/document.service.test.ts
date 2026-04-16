@@ -1,8 +1,8 @@
 import { withTransaction } from '@/utils/database/with-transaction';
 import { withQuery } from '@/utils/database/with-query';
-import { fetchDocument, upsertDocument } from '@/services/document.service';
+import { fetchDocument, upsertDocument } from '@/services/story/document.service';
 import { StoryNotFoundError } from '@/utils/error/custom-errors';
-import { fetchWorld } from '@/services/world.service';
+import { fetchWorld } from '@/services/story/world.service';
 import {
   MOCK_DOC_ID,
   MOCK_STORY_ID,
@@ -15,7 +15,7 @@ import {
 import { createMockClient } from '@/__tests__/constants/mock-database';
 
 jest.mock('@/config/database');
-jest.mock('@/services/world.service');
+jest.mock('@/services/story/world.service');
 jest.mock('@/utils/database/with-transaction');
 jest.mock('@/utils/database/with-query');
 
