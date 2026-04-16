@@ -1,3 +1,5 @@
+import { Plan } from '@/types/enum/plan';
+
 jest.mock('@/config/database', () => ({
   __esModule: true,
   default: { query: jest.fn(), connect: jest.fn() },
@@ -33,7 +35,7 @@ describe('login', () => {
     mockClient.query
       .mockResolvedValueOnce({ rows: [mockUser] })
       .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce({ rows: [{ plan_type: 'pro-plan' }] });
+      .mockResolvedValueOnce({ rows: [{ plan_type: Plan.pro }] });
     mockFetchLegacy.mockImplementation(async () => mockLegacy);
     (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
     (jwt.sign as jest.Mock).mockReturnValueOnce(mockLoginToken);

@@ -4,13 +4,14 @@ import stripe from '@/config/stripe';
 import logger from '@/config/logger';
 import type { CreateUserBody, UpdateUserBody, SubscribeBody } from '@/schemas/user.schemas';
 import { PlanRow, UserRow } from '@/types/database';
-import { PlanType } from '@/types/plan';
 import { EmailTakenError } from '@/constants/error/custom-errors';
+import { UserResponse } from '@/types/response';
+import { Plan } from '@/types/enum/plan';
 
 const SALT_ROUNDS = 12;
 
 // Create user
-export async function createUser(data: CreateUserBody) {
+export async function createUser(data: CreateUserBody): Promise<void> {
   const existing = await pool.query('SELECT 1 FROM users WHERE email = $1', [data.email]);
   if (existing.rows.length > 0) throw new EmailTakenError();
 
@@ -24,7 +25,7 @@ export async function createUser(data: CreateUserBody) {
 }
 
 // Update user
-export async function updateUser(userId: string, data: UpdateUserBody) {
+export async function updateUser(userId: string, data: UpdateUserBody): Promise<UserResponse> {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -186,12 +187,8 @@ export async function subscribe(userId: string, data: SubscribeBody) {
 }
 
 // Private helpers
-async function calculatePrice(
-  userId: string,
-  planType: PlanType,
-  yearPlan: boolean,
-): Promise<number> {
-  if (yearPlan) return planType === 'pro-plan' ? 10000 : 30000;
+async function calculatePrice(userId: string, planType: Plan, yearPlan: boolean): Promise<number> {
+  if (yearPlan) return planType === Plan.pro ? 10000 : 30000;
 
   const countResult = await pool.query(
     'SELECT COUNT(*) as cnt FROM billing WHERE user_id = $1 AND plan_type = $2 AND is_year_plan = FALSE',
@@ -199,6 +196,6 @@ async function calculatePrice(
   );
   const monthsBilled = parseInt(countResult.rows[0].cnt, 10);
 
-  if (planType === 'pro-plan') return monthsBilled < 3 ? 500 : 1000;
+  if (planType === Plan.pro) return monthsBilled < 3 ? 500 : 1000;
   return monthsBilled < 3 ? 1500 : 3000;
 }

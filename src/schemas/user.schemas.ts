@@ -1,4 +1,5 @@
 import { z } from '@/config/zod-extended';
+import { Plan } from '@/types/enum/plan';
 
 // Password strength schema (reused for creation & update)
 const strongPassword = z
@@ -46,9 +47,7 @@ export const BillingHistoryParamsSchema = z.object({
 });
 
 export const SubscribeSchema = z.object({
-  planType: z.enum(['pro-plan', 'max-plan'], {
-    message: 'planType must be "pro-plan" or "max-plan"',
-  }),
+  planType: z.enum(Plan, { message: 'planType must be "pro-plan" or "max-plan"' }),
   yearPlan: z.boolean().optional().default(false),
   paymentMethodId: z.string().min(1, 'paymentMethodId is required (from Stripe.js)'),
 });

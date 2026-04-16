@@ -1,4 +1,6 @@
 // API response types
+import { Plan } from '@/types/enum/plan';
+
 export interface DocumentResponse {
   documentId: string;
   storyId: string;
@@ -33,9 +35,18 @@ export interface WorldResponse {
 export interface LoginResponse {
   email: string;
   userId: string;
-  plan: 'pro-plan' | 'max-plan' | null;
+  plan: Plan | null;
   firstName: string;
   lastName: string;
   legacy: WorldResponse[];
   token: string;
+}
+
+export interface UserResponse {
+  email: string;
+  firstName: string;
+  lastName: string;
+  plan: Plan | null;
+  genres: string[];
+  userId: string;
 }

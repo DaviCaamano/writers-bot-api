@@ -11,6 +11,7 @@ import * as billingService from '@/services/billing/billing.service';
 import { mockLoginResponse } from '@/__tests__/constants/mock-login';
 import request from 'supertest';
 import app from '@/app';
+import { Plan } from '@/types/enum/plan';
 
 const mockGetBillingHistory = billingService.getBillingHistory as jest.Mock;
 
@@ -20,7 +21,7 @@ describe('GET /users/history/:userId', () => {
     const mockBilling = [
       {
         billingId: 'bill-1',
-        planType: 'pro-plan',
+        planType: Plan.pro,
         isYearPlan: false,
         amountCents: 500,
         billedAt: new Date().toISOString(),

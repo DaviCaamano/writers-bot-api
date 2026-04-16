@@ -1,4 +1,6 @@
 // Database row types
+import { Plan } from '@/types/enum/plan';
+
 export interface UserRow {
   user_id: string;
   first_name: string;
@@ -57,7 +59,7 @@ export interface DocumentRow {
 export interface PlanRow {
   plan_id: string;
   user_id: string;
-  plan_type: 'pro-plan' | 'max-plan';
+  plan_type: Plan;
   is_year_plan: boolean;
   is_active: boolean;
   stripe_subscription_id: string | null;
@@ -70,7 +72,7 @@ export interface PlanRow {
 export interface BillingRow {
   billing_id: string;
   user_id: string;
-  plan_type: 'pro-plan' | 'max-plan';
+  plan_type: Plan;
   is_year_plan: boolean;
   amount_cents: number;
   stripe_payment_intent_id: string | null;

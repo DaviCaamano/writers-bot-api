@@ -1,13 +1,14 @@
 import { mockDate, mockLegacy } from '@/__tests__/constants/mock-story';
 import { LoginResponse } from '@/types/response';
 import { UserRow } from '@/types/database';
+import {Plan} from '@/types/enum/plan';
 
 export const mockLoginEmail = 'jane@example.com';
 export const mockLoginUserId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 export const mockLoginToken = 'mock-jwt-token';
 export const mockLoginFirstName = 'Jane';
 export const mockLoginLastName = 'Doe';
-export const mockLoginPlan = 'pro-plan';
+export const mockLoginPlan = Plan.pro;
 export const mockStrongPassword = 'P@ssword123!';
 export const mockHashedPassword = '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
 export const mockStripeCustomerId = 'cus_1234567890';

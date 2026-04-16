@@ -14,6 +14,7 @@ import {
   UpsertStorySchema,
   UpsertWorldSchema,
 } from '@/schemas/story.schemas';
+import { Plan } from '@/types/enum/plan';
 
 export const registry = new OpenAPIRegistry();
 
@@ -75,7 +76,7 @@ const LoginResponseSchema = registry.register(
   z.object({
     email: z.email(),
     userId: z.uuid(),
-    plan: z.enum(['pro-plan', 'max-plan']).nullable(),
+    plan: z.enum(Plan).nullable(),
     firstName: z.string(),
     lastName: z.string(),
     legacy: z.array(WorldSchema),

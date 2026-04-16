@@ -13,9 +13,10 @@ import {
   PgColumn,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
+import { Plan } from '@/types/enum/plan';
 
 // Enums
-export const planTypeEnum = pgEnum('plan_type', ['pro-plan', 'max-plan']);
+export const planTypeEnum = pgEnum('plan_type', Plan);
 
 // Users
 export const users = pgTable('users', {
