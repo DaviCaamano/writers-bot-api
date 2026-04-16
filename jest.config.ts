@@ -4,7 +4,7 @@ const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['**/src/__tests__/**/*.test.ts'],
-  setupFiles: ['./src/__tests__/setup.ts'],
+  setupFiles: ['./src/config/jest-setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },

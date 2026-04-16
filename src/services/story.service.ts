@@ -1,106 +1,51 @@
-import pool from '@/config/database';
-import { fetchWorldById } from '@/utils/legacy';
-import type { UpsertDocumentBody, UpsertStoryBody, UpsertWorldBody } from '@/schemas/story.schemas';
-import { withTransaction } from '@/utils/withTransaction';
-import { DocumentRow, StoryRow, WorldRow } from '@/types/database';
-import type { WorldResponse } from '@/types/response';
+import type { UpsertStoryBody } from '@/schemas/story.schemas';
+import { withTransaction } from '@/utils/database/with-transaction';
+import { StoryRow, StoryRowWithDocuments } from '@/types/database';
+import { WorldNotFoundError } from '@/utils/error/custom-errors';
+import { withQuery } from '@/utils/database/with-query';
+import { StoryResponse } from '@/types/response';
+import { mapStoryResponse } from '@/utils/story/map-story';
 
-export class StoryNotFoundError extends Error {}
-export class WorldNotFoundError extends Error {}
-export class DocumentNotFoundError extends Error {}
-
-// Document
-export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
-  const { documentId, title, body, storyId } = data;
-
-  return withTransaction(async (client) => {
-    let targetStoryId = storyId;
-    let worldId: string;
-
-    // If documentId is provided, update the existing document
-    if (documentId) {
-      const existingDoc = await client.query<DocumentRow & { user_id: string; world_id: string }>(
-        `SELECT d.*, w.user_id, s.world_id FROM documents d
-         JOIN stories s ON s.story_id = d.story_id
-         JOIN worlds w ON w.world_id = s.world_id
-         WHERE d.document_id = $1`,
-        [documentId],
-      );
-
-      if (existingDoc.rows.length === 0) {
-        throw new DocumentNotFoundError();
-      }
-
-      // Verify the user owns this document
-      if (existingDoc.rows[0].user_id !== userId) {
-        throw new DocumentNotFoundError();
-      }
-
-      await client.query(
-        'UPDATE documents SET title = $1, body = $2, updated_at = NOW() WHERE document_id = $3',
-        [title, body ?? existingDoc.rows[0].body, documentId],
-      );
-
-      worldId = existingDoc.rows[0].world_id;
-      return fetchWorldById(worldId);
-    }
-
-    // Create a new document: determine or create the story
-    if (!targetStoryId) {
-      const worldResult = await client.query(
-        'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
-        [userId, 'Untitled World'],
-      );
-      worldId = worldResult.rows[0].world_id;
-      const storyResult = await client.query(
-        'INSERT INTO stories (world_id, title) VALUES ($1, $2) RETURNING story_id',
-        [worldId, 'Untitled Story'],
-      );
-      targetStoryId = storyResult.rows[0].story_id;
-    } else {
-      const storyResult = await client.query<StoryRow>(
-        `SELECT s.* FROM stories s
-         JOIN worlds w ON w.world_id = s.world_id
-         WHERE s.story_id = $1 AND w.user_id = $2`,
-        [targetStoryId, userId],
-      );
-      if (storyResult.rows.length === 0) {
-        throw new StoryNotFoundError();
-      }
-      worldId = storyResult.rows[0].world_id;
-    }
-
-    // Get the last document in the chain with row-level locking to prevent race conditions
-    const lastDocResult = await client.query<DocumentRow>(
-      `SELECT * FROM documents WHERE story_id = $1 AND successor_id IS NULL
-       ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
-      [targetStoryId],
+export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments> => {
+  return withQuery<StoryRowWithDocuments>(async (client) => {
+    const result = await client.query<StoryRowWithDocuments>(
+      `SELECT *
+      FROM stories s
+      WHERE s.story_id = $1;`,
+      [storyId],
     );
-    const predecessorId = lastDocResult.rows.length > 0 ? lastDocResult.rows[0].document_id : null;
-
-    // Insert new document
-    const result = await client.query(
-      `INSERT INTO documents (story_id, title, body, predecessor_id)
-       VALUES ($1, $2, $3, $4) RETURNING document_id`,
-      [targetStoryId, title, body, predecessorId],
-    );
-    const newDocId = result.rows[0].document_id;
-
-    // Update predecessor's successor if one exists
-    if (predecessorId) {
-      await client.query(
-        'UPDATE documents SET successor_id = $1, updated_at = NOW() WHERE document_id = $2',
-        [newDocId, predecessorId],
-      );
+    if (result.rows.length === 0) {
+      throw new Error('Story not found');
     }
-
-    return fetchWorldById(worldId);
+    return result.rows[0];
   });
-}
+};
 
-// Story
-export async function upsertStory(userId: string, data: UpsertStoryBody) {
-  const { storyId, title, worldId } = data;
+export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRowWithDocuments> => {
+  return withQuery<StoryRowWithDocuments>(async (client) => {
+    const result = await client.query<StoryRowWithDocuments>(
+      `SELECT
+      s.*
+      COALESCE(
+        json_agg(ORDER BY d.created_at) FILTER (WHERE d.document_id IS NOT NULL),
+        '[]'
+      ) AS documents
+      FROM stories s
+      LEFT JOIN documents d ON d.story_id = s.story_id
+      WHERE s.story_id = $1
+      GROUP BY s.story_id;`,
+      [storyId],
+    );
+    if (result.rows.length === 0) {
+      throw new Error('Story not found');
+    }
+    return result.rows[0];
+  });
+};
+
+export async function upsertStory(userId: string, data: UpsertStoryBody): Promise<StoryResponse> {
+  let { worldId } = data;
+  const { storyId, title } = data;
 
   return withTransaction(async (client) => {
     let resultWorldId: string;
@@ -132,10 +77,9 @@ export async function upsertStory(userId: string, data: UpsertStoryBody) {
             'UPDATE stories SET world_id = $1, updated_at = NOW() WHERE story_id = $2',
             [worldId, storyId],
           );
-          resultWorldId = worldId;
         }
 
-        return fetchWorldById(resultWorldId);
+        return mapStoryResponse(await fetchStory(storyId));
       }
     }
 
@@ -147,48 +91,19 @@ export async function upsertStory(userId: string, data: UpsertStoryBody) {
       if (worldCheck.rows.length === 0) {
         throw new WorldNotFoundError();
       }
-      resultWorldId = worldId;
     } else {
       const newWorld = await client.query(
         'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
         [userId, 'Untitled World'],
       );
-      resultWorldId = newWorld.rows[0].world_id;
+      worldId = newWorld.rows[0].world_id;
     }
 
-    await client.query('INSERT INTO stories (world_id, title) VALUES ($1, $2)', [
-      resultWorldId,
-      title,
-    ]);
-    return fetchWorldById(resultWorldId);
-  });
-}
-
-// World
-export async function upsertWorld(
-  userId: string,
-  data: UpsertWorldBody,
-): Promise<WorldResponse | null> {
-  const { worldId, title } = data;
-
-  if (worldId) {
-    const existing = await pool.query('SELECT 1 FROM worlds WHERE world_id = $1 AND user_id = $2', [
-      worldId,
-      userId,
-    ]);
-    if (existing.rows.length === 0) {
-      throw new WorldNotFoundError();
-    }
-    await pool.query('UPDATE worlds SET title = $1, updated_at = NOW() WHERE world_id = $2', [
-      title,
-      worldId,
-    ]);
-    return fetchWorldById(worldId);
-  } else {
-    const newWorld = await pool.query<WorldRow>(
-      'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
-      [userId, title],
+    const newStory = await client.query(
+      'INSERT INTO stories (world_id, title) VALUES ($1, $2) RETURNING story_id',
+      [worldId!, title],
     );
-    return fetchWorldById(newWorld.rows[0].world_id);
-  }
+    const newStoryId = newStory.rows[0].story_id;
+    return mapStoryResponse(await fetchStory(newStoryId));
+  });
 }

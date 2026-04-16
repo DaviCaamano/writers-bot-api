@@ -1,13 +1,13 @@
-import { orderLinkedDocs } from '@/utils/orderLinkedDocs';
+import { orderLinkedDocs } from '@/utils/order-linked-docs';
 import { DocumentResponse } from '@/types/response';
 
-const STORY_ID = 'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33';
-const DOC_ID = 'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44';
+const MOCK_STORY_ID = 'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33';
+const MOCK_DOC_ID = 'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44';
 const mockDate = new Date('2026-01-01T00:00:00Z');
 
 const mockDoc: DocumentResponse = {
-  documentId: DOC_ID,
-  storyId: STORY_ID,
+  documentId: MOCK_DOC_ID,
+  storyId: MOCK_STORY_ID,
   title: 'Test Document',
   body: 'Test content',
   predecessorId: null,

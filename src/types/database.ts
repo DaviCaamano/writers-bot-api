@@ -25,6 +25,10 @@ export interface WorldRow {
   updated_at: Date;
 }
 
+export interface WorldRowWithStories extends WorldRow {
+  stories: StoryRow[];
+}
+
 export interface StoryRow {
   story_id: string;
   world_id: string;
@@ -33,6 +37,10 @@ export interface StoryRow {
   successor_id: string | null;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface StoryRowWithDocuments extends StoryRow {
+  documents: DocumentRow[];
 }
 
 export interface DocumentRow {
@@ -69,9 +77,6 @@ export interface BillingRow {
   stripe_invoice_id: string | null;
   billed_at: Date;
 }
-
-
-
 
 export interface AuthenticationRow {
   auth_id: string;

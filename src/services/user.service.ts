@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import pool from '@/config/database';
 import stripe from '@/config/stripe';
 import logger from '@/config/logger';
-import { fetchLegacy } from '@/utils/legacy';
 import type {
   LoginBody,
   CreateUserBody,
@@ -12,6 +11,7 @@ import type {
 } from '@/schemas/user.schemas';
 import { BillingRow, PlanRow, UserRow } from '@/types/database';
 import { PlanType } from '@/types/plan';
+import { fetchLegacy } from '@/utils/story/world';
 
 const SALT_ROUNDS = 12;
 

@@ -1,0 +1,77 @@
+import { WorldNotFoundError } from '@/utils/error/custom-errors';
+import { UpsertWorldBody } from '@/schemas/story.schemas';
+import { WorldResponse } from '@/types/response';
+import pool from '@/config/database';
+import { DocumentRow, StoryRow, StoryRowWithDocuments, WorldRow } from '@/types/database';
+import { mapWorldResponse } from '@/utils/story/map-story';
+
+export async function upsertWorld(
+  userId: string,
+  data: UpsertWorldBody,
+): Promise<WorldResponse | null> {
+  const { worldId, title } = data;
+
+  if (worldId) {
+    const existing = await pool.query('SELECT 1 FROM worlds WHERE world_id = $1 AND user_id = $2', [
+      worldId,
+      userId,
+    ]);
+    if (existing.rows.length === 0) {
+      throw new WorldNotFoundError();
+    }
+    await pool.query('UPDATE worlds SET title = $1, updated_at = NOW() WHERE world_id = $2', [
+      title,
+      worldId,
+    ]);
+    return fetchWorld(worldId);
+  } else {
+    const newWorld = await pool.query<WorldRow>(
+      'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
+      [userId, title],
+    );
+    return fetchWorld(newWorld.rows[0].world_id);
+  }
+}
+
+/**
+ * Fetches a single world with all nested stories and documents.
+ */
+export async function fetchWorld(worldId: string): Promise<WorldResponse | null> {
+  const worldResult = await pool.query<WorldRow>('SELECT * FROM worlds WHERE world_id = $1', [
+    worldId,
+  ]);
+
+  if (worldResult.rows.length === 0) return null;
+
+  const world = worldResult.rows[0];
+
+  const storiesResult = await pool.query<StoryRow>(
+    'SELECT * FROM stories WHERE world_id = $1 ORDER BY created_at',
+    [worldId],
+  );
+
+  const storyIds = storiesResult.rows.map((s) => s.story_id);
+
+  let documentRows: DocumentRow[] = [];
+  if (storyIds.length > 0) {
+    const docsResult = await pool.query<DocumentRow>(
+      'SELECT * FROM documents WHERE story_id = ANY($1) ORDER BY created_at',
+      [storyIds],
+    );
+    documentRows = docsResult.rows;
+  }
+
+  const docsByStory = new Map<string, DocumentRow[]>();
+  for (const doc of documentRows) {
+    const arr = docsByStory.get(doc.story_id) ?? [];
+    arr.push(doc);
+    docsByStory.set(doc.story_id, arr);
+  }
+
+  const stories: StoryRowWithDocuments[] = storiesResult.rows.map((story) => ({
+    ...story,
+    documents: docsByStory.get(story.story_id) ?? [],
+  }));
+
+  return mapWorldResponse(world, stories);
+}

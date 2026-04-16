@@ -6,6 +6,12 @@ export default [
   {
     ignores: ['dist/**', 'coverage/**'],
   },
+  {
+    files: ['drizzle.config.js'],
+    languageOptions: {
+      globals: { process: 'readonly' },
+    },
+  },
   js.configs.recommended,
   ...tseslint.configs['flat/recommended'],
   {

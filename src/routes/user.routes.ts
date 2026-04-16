@@ -6,7 +6,7 @@ import {
   createAccountLimiter,
   subscribeLimiter,
   generalLimiter,
-} from '@/config/rateLimiters';
+} from '@/config/rate-limiters';
 import {
   LoginSchema,
   LoginBody,
@@ -33,7 +33,7 @@ import {
   InvalidCredentialsError,
   EmailTakenError,
 } from '@/services/user.service';
-import { AuthRequest } from '@/types/Request';
+import { AuthRequest } from '@/types/request';
 
 const router = Router();
 
