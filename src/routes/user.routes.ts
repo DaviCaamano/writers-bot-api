@@ -57,14 +57,10 @@ router.post(
 );
 
 // Logout (revokes only the current session token)
-router.post(
-  '/logout',
-  authMiddleware,
-  async (req: AuthRequest, res: Response): Promise<void> => {
-    await logout(req.token!);
-    res.json({ status: 'ok' });
-  },
-);
+router.post('/logout', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  await logout(req.token!);
+  res.json({ status: 'ok' });
+});
 
 // Create account
 // Returns the same response whether the email exists or not to prevent enumeration.
@@ -114,14 +110,10 @@ router.post(
 );
 
 // Delete account
-router.post(
-  '/deleteme',
-  authMiddleware,
-  async (req: AuthRequest, res: Response): Promise<void> => {
-    await deleteUser(req.userId!);
-    res.json({ status: 'ok' });
-  },
-);
+router.post('/deleteme', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  await deleteUser(req.userId!);
+  res.json({ status: 'ok' });
+});
 
 // Billing history (owner-only)
 router.get(

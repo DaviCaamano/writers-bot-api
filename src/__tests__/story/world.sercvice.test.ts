@@ -17,7 +17,6 @@ import { fetchWorld, upsertWorld } from '@/services/world.service';
 import { DocumentRow, StoryRow } from '@/types/database';
 import { mockPool } from '@/__tests__/constants/mock-database';
 
-
 describe('upsertWorld', () => {
   it('should insert a new world when no worldId is provided', async () => {
     (mockPool.query as jest.Mock)

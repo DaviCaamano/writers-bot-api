@@ -141,7 +141,6 @@ describe('fetchLegacy', () => {
     expect(result[1].stories[0].storyId).toBe(story3Id);
     expect(result[1].stories[1].storyId).toBe(story4Id);
     expect(result[1].stories[2].storyId).toBe(story5Id);
-
   });
 
   it('should skip the documents query when there are no stories', async () => {
@@ -155,5 +154,3 @@ describe('fetchLegacy', () => {
     expect(mockPool.query).toHaveBeenCalledTimes(2);
   });
 });
-
-

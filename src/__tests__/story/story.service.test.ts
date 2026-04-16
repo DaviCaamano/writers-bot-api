@@ -32,7 +32,6 @@ describe('fetchStory', () => {
   });
 });
 
-
 describe('fetchStoryWithDocuments', () => {
   it('should return a story with its documents', async () => {
     const storyWithDocs = { ...mockStory, documents: [mockDoc] };

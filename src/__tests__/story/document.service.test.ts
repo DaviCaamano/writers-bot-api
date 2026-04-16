@@ -23,6 +23,19 @@ const mockFetchWorld = fetchWorld as jest.MockedFunction<typeof fetchWorld>;
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 
+describe('fetchDocument', () => {
+  it('should fetch a document by its ID', async () => {
+    const mockClient = createMockClient();
+    mockClient.query.mockResolvedValueOnce({
+      rows: [mockDoc],
+    });
+    mockWithQuery.mockImplementation((callback) => callback(mockClient as any));
+
+    const result = await fetchDocument(MOCK_DOC_ID);
+    expect(result).toEqual(mockDocResponse);
+  });
+});
+
 describe('upsertDocument', () => {
   it('should create a new document with a new world and story when no IDs are provided', async () => {
     const mockClient = createMockClient();
@@ -82,18 +95,5 @@ describe('upsertDocument', () => {
     ).rejects.toThrow(StoryNotFoundError);
 
     expect(mockFetchWorld).not.toHaveBeenCalled();
-  });
-});
-
-describe('fetchDocument', () => {
-  it('should fetch a document by its ID', async () => {
-    const mockClient = createMockClient();
-    mockClient.query.mockResolvedValueOnce({
-      rows: [mockDoc],
-    });
-    mockWithQuery.mockImplementation((callback) => callback(mockClient as any));
-
-    const result = await fetchDocument(MOCK_DOC_ID);
-    expect(result).toEqual(mockDocResponse);
   });
 });

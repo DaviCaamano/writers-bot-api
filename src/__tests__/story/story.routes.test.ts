@@ -57,10 +57,7 @@ describe('POST /story/world', () => {
     const headers = authHeaders();
     mockUpsertWorld.mockResolvedValueOnce(mockWorldResponse);
 
-    const res = await request(app)
-      .post('/story/world')
-      .set(headers)
-      .send({ title: 'Test World' });
+    const res = await request(app).post('/story/world').set(headers).send({ title: 'Test World' });
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ worldId: MOCK_WORLD_ID, title: 'Test World' });
@@ -92,10 +89,7 @@ describe('POST /story/story', () => {
     const headers = authHeaders();
     mockUpsertStory.mockResolvedValueOnce(mockWorldResponse);
 
-    const res = await request(app)
-      .post('/story/story')
-      .set(headers)
-      .send({ title: 'New Story' });
+    const res = await request(app).post('/story/story').set(headers).send({ title: 'New Story' });
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ worldId: MOCK_WORLD_ID });

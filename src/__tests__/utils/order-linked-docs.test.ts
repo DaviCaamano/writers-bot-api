@@ -41,10 +41,8 @@ const linkedDoc3: DocumentResponse = {
   successorId: null,
 };
 
-
 describe('orderLinkedDocs', () => {
   it('should return an empty array when there are no linked documents', () => {
-
     // Returns an empty array when given an empty array
     expect(orderLinkedDocs([], getId)).toEqual([]);
   });
@@ -55,7 +53,7 @@ describe('orderLinkedDocs', () => {
       linkedDoc2,
       linkedDoc3,
     ]);
-  })
+  });
 
   it('Throws an error if linked-list has no head', () => {
     expect(() =>
@@ -64,7 +62,7 @@ describe('orderLinkedDocs', () => {
         getId,
       ),
     ).toThrow('No head node found');
-  })
+  });
 
   it('Throws an error if linked-list has a cyclical link', () => {
     expect(() =>
@@ -73,7 +71,7 @@ describe('orderLinkedDocs', () => {
         getId,
       ),
     ).toThrow('Broken chain: successor not found');
-  })
+  });
 
   it('Throws an error if there is a cycle existing within the list', () => {
     expect(() =>

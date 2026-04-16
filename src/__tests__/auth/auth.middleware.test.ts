@@ -49,7 +49,9 @@ describe('Auth Middleware', () => {
 
   describe('Protected route with revoked token', () => {
     it('returns 401 when token is not found in the authentication table', async () => {
-      const token = jwt.sign({ userId: 'test-user-id' }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+      const token = jwt.sign({ userId: 'test-user-id' }, process.env.JWT_SECRET!, {
+        expiresIn: '7d',
+      });
 
       (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] }); // no row in the authentication table
 

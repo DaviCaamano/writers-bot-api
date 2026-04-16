@@ -45,7 +45,10 @@ describe('POST /user/create', () => {
 
   it('returns 400 when email is invalid', async () => {
     const res = await request(app).post('/user/create').send({
-      firstName: 'Jane', lastName: 'Doe', email: 'not-an-email', password: STRONG_PASSWORD,
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'not-an-email',
+      password: STRONG_PASSWORD,
     });
     expect(res.status).toBe(400);
     expect(res.body.details.properties).toHaveProperty('email');
@@ -53,7 +56,10 @@ describe('POST /user/create', () => {
 
   it('returns 400 when password is too weak', async () => {
     const res = await request(app).post('/user/create').send({
-      firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com', password: 'short',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane@example.com',
+      password: 'short',
     });
     expect(res.status).toBe(400);
     expect(res.body.details.properties).toHaveProperty('password');
@@ -63,7 +69,10 @@ describe('POST /user/create', () => {
     mockCreateUser.mockRejectedValueOnce(new userService.EmailTakenError());
 
     const res = await request(app).post('/user/create').send({
-      firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com', password: STRONG_PASSWORD,
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane@example.com',
+      password: STRONG_PASSWORD,
     });
     expect(res.status).toBe(201);
     expect(res.body.status).toBe('ok');
@@ -73,7 +82,10 @@ describe('POST /user/create', () => {
     mockCreateUser.mockResolvedValueOnce(undefined);
 
     const res = await request(app).post('/user/create').send({
-      firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com', password: STRONG_PASSWORD,
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane@example.com',
+      password: STRONG_PASSWORD,
     });
     expect(res.status).toBe(201);
     expect(res.body.status).toBe('ok');
@@ -92,7 +104,8 @@ describe('POST /user/login', () => {
     mockLogin.mockRejectedValueOnce(new userService.InvalidCredentialsError());
 
     const res = await request(app).post('/user/login').send({
-      email: 'unknown@example.com', password: STRONG_PASSWORD,
+      email: 'unknown@example.com',
+      password: STRONG_PASSWORD,
     });
     expect(res.status).toBe(401);
     expect(res.body.error).toBe('Invalid email or password');
@@ -102,7 +115,8 @@ describe('POST /user/login', () => {
     mockLogin.mockResolvedValueOnce(mockLoginResponse);
 
     const res = await request(app).post('/user/login').send({
-      email: 'jane@example.com', password: STRONG_PASSWORD,
+      email: 'jane@example.com',
+      password: STRONG_PASSWORD,
     });
 
     expect(res.status).toBe(200);
@@ -141,7 +155,9 @@ describe('POST /user/logout', () => {
 // POST /user/genres
 describe('POST /user/genres', () => {
   it('returns 401 without auth', async () => {
-    const res = await request(app).post('/user/genres').send({ genres: ['Fantasy'] });
+    const res = await request(app)
+      .post('/user/genres')
+      .send({ genres: ['Fantasy'] });
     expect(res.status).toBe(401);
   });
 
@@ -188,7 +204,13 @@ describe('GET /users/billing-history/:userId', () => {
   it('returns 200 with billing history for own account', async () => {
     const headers = authHeaders(mockLoginResponse.userId);
     const mockBilling = [
-      { billingId: 'bill-1', planType: 'pro-plan', isYearPlan: false, amountCents: 500, billedAt: new Date().toISOString() },
+      {
+        billingId: 'bill-1',
+        planType: 'pro-plan',
+        isYearPlan: false,
+        amountCents: 500,
+        billedAt: new Date().toISOString(),
+      },
     ];
     mockGetBillingHistory.mockResolvedValueOnce(mockBilling);
 
@@ -205,9 +227,7 @@ describe('GET /users/billing-history/:userId', () => {
     const headers = authHeaders(mockLoginResponse.userId);
     const otherUserId = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
 
-    const res = await request(app)
-      .get(`/users/billing-history/${otherUserId}`)
-      .set(headers);
+    const res = await request(app).get(`/users/billing-history/${otherUserId}`).set(headers);
 
     expect(res.status).toBe(403);
     expect(res.body.error).toBe('Forbidden');
