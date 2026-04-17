@@ -28,7 +28,11 @@ import {
 } from '@/services/user/user.service';
 import { AuthRequest } from '@/types/request';
 import { login, logout } from '@/services/user/login.service';
-import { EmailTakenError, InvalidCredentialsError } from '@/constants/error/custom-errors';
+import {
+  EmailTakenError,
+  InvalidCredentialsError,
+  StripePaymentFailed,
+} from '@/constants/error/custom-errors';
 
 const router = Router();
 
@@ -117,8 +121,15 @@ router.post(
   subscribeLimiter,
   validate(SubscribeSchema),
   async (req: AuthRequest, res: Response): Promise<void> => {
-    const result = await subscribe(req.userId!, req.body as SubscribeBody);
-    res.json({ status: 'ok', ...result });
+    try {
+      res.json({ status: 'ok', ...(await subscribe(req.userId!, req.body as SubscribeBody)) });
+    } catch (err) {
+      if (err instanceof StripePaymentFailed) {
+        res.status(402).json({ error: 'Payment failed' });
+        return;
+      }
+      throw err;
+    }
   },
 );
 

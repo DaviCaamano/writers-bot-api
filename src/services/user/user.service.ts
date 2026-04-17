@@ -4,7 +4,7 @@ import stripe from '@/config/stripe';
 import logger from '@/config/logger';
 import type { CreateUserBody, UpdateUserBody, SubscribeBody } from '@/schemas/user.schemas';
 import { GenreRow, PlanRow, UserRow } from '@/types/database';
-import { EmailTakenError } from '@/constants/error/custom-errors';
+import { EmailTakenError, StripePaymentFailed } from '@/constants/error/custom-errors';
 import { UserResponse } from '@/types/response';
 import { Plan } from '@/types/enum/plan';
 import { withTransaction } from '@/utils/database/with-transaction';
@@ -161,7 +161,7 @@ export async function subscribe(userId: string, data: SubscribeBody) {
 
     if (paymentIntent.status !== 'succeeded') {
       logger.warn({ userId, status: paymentIntent.status }, 'Payment not succeeded');
-      throw new Error(`Payment failed with status: ${paymentIntent.status}`);
+      throw new StripePaymentFailed();
     }
 
     const updatePlanQuery = client.query(

@@ -11,64 +11,63 @@ import app from '@/app';
 import * as loginService from '@/services/user/login.service';
 import { mockLoginResponse } from '@/__tests__/constants/mock-user';
 import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
+import { mockClear } from '@/__tests__/utils/test-wrappers';
 
 const STRONG_PASSWORD = 'P@ssword123!';
 const mockLogin = loginService.login as jest.Mock;
 const mockLogout = loginService.logout as jest.Mock;
 
-describe('POST /user/login', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns 400 when body is invalid', async () => {
-    const res = await request(app).post('/user/login').send({ email: 'not-an-email' });
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBe('Validation failed');
-  });
-
-  it('returns 401 on invalid credentials', async () => {
-    mockLogin.mockRejectedValueOnce(new InvalidCredentialsError());
-
-    const res = await request(app).post('/user/login').send({
-      email: 'unknown@example.com',
-      password: STRONG_PASSWORD,
-    });
-    expect(res.status).toBe(401);
-    expect(res.body.error).toBe('Invalid email or password');
-  });
-
-  it('returns 200 with user data on success', async () => {
-    mockLogin.mockResolvedValueOnce(mockLoginResponse);
-
-    const res = await request(app).post('/user/login').send({
-      email: 'jane@example.com',
-      password: STRONG_PASSWORD,
+describe(
+  'POST /user/login',
+  mockClear(() => {
+    it('returns 400 when body is invalid', async () => {
+      const res = await request(app).post('/user/login').send({ email: 'not-an-email' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Validation failed');
     });
 
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject(JSON.parse(JSON.stringify(mockLoginResponse)));
-  });
-});
+    it('returns 401 on invalid credentials', async () => {
+      mockLogin.mockRejectedValueOnce(new InvalidCredentialsError());
 
-describe('POST /user/logout', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+      const res = await request(app).post('/user/login').send({
+        email: 'unknown@example.com',
+        password: STRONG_PASSWORD,
+      });
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe('Invalid email or password');
+    });
 
-  it('returns 401 without auth', async () => {
-    const res = await request(app).post('/user/logout').send();
-    expect(res.status).toBe(401);
-  });
+    it('returns 200 with user data on success', async () => {
+      mockLogin.mockResolvedValueOnce(mockLoginResponse);
 
-  it('returns 200 and calls logout with the token', async () => {
-    mockLogout.mockResolvedValueOnce(undefined);
+      const res = await request(app).post('/user/login').send({
+        email: 'jane@example.com',
+        password: STRONG_PASSWORD,
+      });
 
-    const headers = mockAuthHeaders();
-    const res = await request(app).post('/user/logout').set(headers).send();
-    expect(res.status).toBe(200);
-    expect(res.body.status).toBe('ok');
-    // Verify logout was called with a token string (not a userId)
-    expect(mockLogout).toHaveBeenCalledWith(expect.any(String));
-  });
-});
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject(JSON.parse(JSON.stringify(mockLoginResponse)));
+    });
+  }),
+);
+
+describe(
+  'POST /user/logout',
+  mockClear(() => {
+    it('returns 401 without auth', async () => {
+      const res = await request(app).post('/user/logout').send();
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 200 and calls logout with the token', async () => {
+      mockLogout.mockResolvedValueOnce(undefined);
+
+      const headers = mockAuthHeaders();
+      const res = await request(app).post('/user/logout').set(headers).send();
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe('ok');
+      // Verify logout was called with a token string (not a userId)
+      expect(mockLogout).toHaveBeenCalledWith(expect.any(String));
+    });
+  }),
+);

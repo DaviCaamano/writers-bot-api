@@ -23,7 +23,6 @@ export const mockGenreField = 'fantasy';
 export const mockGenreField2 = 'horror';
 export const mockPlanId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14';
 
-
 export const mockUser: UserRow = {
   user_id: mockUserId,
   email: mockLoginEmail,
@@ -34,7 +33,6 @@ export const mockUser: UserRow = {
   created_at: mockDate,
   updated_at: mockDate,
 };
-
 
 export const mockNewUser: CreateUserBody = {
   firstName: mockLoginFirstName,
@@ -80,8 +78,8 @@ export const mockPlan: PlanRow = {
   updated_at: mockDate,
 };
 
-export const mockSubscriptionRequest: SubscribeBody ={
+export const mockSubscriptionRequest: SubscribeBody = {
   planType: Plan.pro,
-    yearPlan: false,
-  paymentMethodId: mockStipePaymentMethodId
-}
+  yearPlan: false,
+  paymentMethodId: mockStipePaymentMethodId,
+};
