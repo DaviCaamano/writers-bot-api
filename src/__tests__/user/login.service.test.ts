@@ -18,17 +18,22 @@ import {
   mockLoginToken,
   mockStrongPassword,
   mockUser,
-} from '@/__tests__/constants/mock-login';
+} from '@/__tests__/constants/mock-user';
 import { PoolClient } from 'pg';
 import { createMockClient } from '@/__tests__/constants/mock-database';
 import { mockLegacy } from '@/__tests__/constants/mock-story';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { InvalidCredentialsError } from '@/constants/error/custom-errors';
 
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 const mockFetchLegacy = fetchLegacy as jest.MockedFunction<typeof fetchLegacy>;
+const mockBcryptCompare = bcrypt.compare as jest.Mock;
+describe('login service: login', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-describe('login', () => {
   it('should return a user object with the correct properties', async () => {
     const mockClient = createMockClient();
     mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
@@ -37,7 +42,7 @@ describe('login', () => {
       .mockResolvedValueOnce(undefined)
       .mockResolvedValueOnce({ rows: [{ plan_type: Plan.pro }] });
     mockFetchLegacy.mockImplementation(async () => mockLegacy);
-    (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+    mockBcryptCompare.mockResolvedValueOnce(true);
     (jwt.sign as jest.Mock).mockReturnValueOnce(mockLoginToken);
 
     const response = await login({
@@ -46,5 +51,28 @@ describe('login', () => {
     });
 
     expect(response).toMatchObject(mockLoginResponse);
+  });
+
+  it('should throw error if email does not exist', async () => {
+    const mockClient = createMockClient();
+    mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+    mockClient.query.mockResolvedValueOnce({ rows: [] });
+
+    expect(
+      login({
+        email: mockLoginEmail,
+        password: mockStrongPassword,
+      }),
+    ).rejects.toThrow(InvalidCredentialsError);
+  });
+
+  it('should throw error if password is incorrect', async () => {
+    const mockClient = createMockClient();
+    mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+    mockClient.query.mockResolvedValueOnce({ rows: [mockUser] });
+    mockBcryptCompare.mockResolvedValueOnce(false);
+    expect(login({ email: mockLoginEmail, password: mockStrongPassword })).rejects.toThrow(
+      InvalidCredentialsError,
+    );
   });
 });

@@ -9,7 +9,7 @@ jest.mock('@/config/database', () => ({
 import request from 'supertest';
 import app from '@/app';
 import * as loginService from '@/services/user/login.service';
-import { mockLoginResponse } from '@/__tests__/constants/mock-login';
+import { mockLoginResponse } from '@/__tests__/constants/mock-user';
 import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
 
 const STRONG_PASSWORD = 'P@ssword123!';
@@ -17,6 +17,10 @@ const mockLogin = loginService.login as jest.Mock;
 const mockLogout = loginService.logout as jest.Mock;
 
 describe('POST /user/login', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 400 when body is invalid', async () => {
     const res = await request(app).post('/user/login').send({ email: 'not-an-email' });
     expect(res.status).toBe(400);
@@ -48,6 +52,10 @@ describe('POST /user/login', () => {
 });
 
 describe('POST /user/logout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 401 without auth', async () => {
     const res = await request(app).post('/user/logout').send();
     expect(res.status).toBe(401);

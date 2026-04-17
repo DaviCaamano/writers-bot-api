@@ -7,6 +7,7 @@ import { fetchLegacy } from '@/utils/story/world';
 import { InvalidCredentialsError } from '@/constants/error/custom-errors';
 import { withQuery } from '@/utils/database/with-query';
 import { LoginResponse } from '@/types/response';
+import { parseExpiration } from '@/utils/database/parseExpiration';
 
 export const login = async (data: LoginBody): Promise<LoginResponse> => {
   return withQuery(async (client) => {
@@ -33,7 +34,7 @@ export const login = async (data: LoginBody): Promise<LoginResponse> => {
       { expiresIn } as jwt.SignOptions,
     );
 
-    const expiresAt = new Date(Date.now() + parseExpiry(expiresIn));
+    const expiresAt = new Date(Date.now() + parseExpiration(expiresIn));
     await client.query(
       'INSERT INTO authentication (user_id, token, expires_at) VALUES ($1, $2, $3)',
       [user.user_id, token, expiresAt],
@@ -72,20 +73,3 @@ export const logout = async (token: string) => {
   });
 };
 
-function parseExpiry(exp: string): number {
-  const match = exp.match(/^(\d+)([smhd])$/);
-  if (!match) return 7 * 24 * 60 * 60 * 1000;
-  const num = parseInt(match[1], 10);
-  switch (match[2]) {
-    case 's':
-      return num * 1000;
-    case 'm':
-      return num * 60 * 1000;
-    case 'h':
-      return num * 60 * 60 * 1000;
-    case 'd':
-      return num * 24 * 60 * 60 * 1000;
-    default:
-      return 7 * 24 * 60 * 60 * 1000;
-  }
-}

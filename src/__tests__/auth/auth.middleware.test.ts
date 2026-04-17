@@ -12,6 +12,10 @@ import pool from '@/config/database';
 const mockPool = pool as jest.Mocked<typeof pool>;
 
 describe('Auth Middleware', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('GET /health (no auth required — baseline)', () => {
     it('returns 200', async () => {
       const res = await request(app).get('/health');

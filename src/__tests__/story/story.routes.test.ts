@@ -34,6 +34,10 @@ const mockWorldResponse = {
 };
 
 describe('POST /story/world', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 401 without auth', async () => {
     const res = await request(app).post('/story/world').send({ title: 'My World' });
     expect(res.status).toBe(401);
@@ -72,6 +76,10 @@ describe('POST /story/world', () => {
 });
 
 describe('POST /story/story', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 400 when title is missing', async () => {
     const headers = mockAuthHeaders();
     const res = await request(app).post('/story/story').set(headers).send({});
@@ -104,6 +112,10 @@ describe('POST /story/story', () => {
 });
 
 describe('POST /story/document', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 400 when title is missing', async () => {
     const headers = mockAuthHeaders();
     const res = await request(app).post('/story/document').set(headers).send({ body: 'content' });

@@ -1,6 +1,7 @@
 import type { DocumentResponse, StoryResponse, WorldResponse } from '@/types/response';
 import type { DocumentRow, StoryRow, WorldRow } from '@/types/database';
 import { padArray } from '@/utils/pad-array';
+import { mockDate } from '@/__tests__/constants/mock-basic';
 export { mockPool } from '@/__tests__/constants/mock-database';
 
 export const MOCK_USER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
@@ -8,8 +9,6 @@ export const MOCK_WORLD_ID = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
 export const MOCK_WORLD_IDs = ['380a22', '380a23', '380a24', '380a25'];
 export const MOCK_STORY_ID = 'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33';
 export const MOCK_DOC_ID = 'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44';
-
-export const mockDate = new Date('2026-01-01T00:00:00Z');
 
 export const mockWorld: WorldRow = {
   world_id: MOCK_WORLD_ID,

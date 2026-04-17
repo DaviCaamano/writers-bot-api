@@ -8,7 +8,7 @@ jest.mock('@/config/database', () => ({
 }));
 jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 import * as billingService from '@/services/billing/billing.service';
-import { mockLoginResponse } from '@/__tests__/constants/mock-login';
+import { mockLoginResponse } from '@/__tests__/constants/mock-user';
 import request from 'supertest';
 import app from '@/app';
 import { Plan } from '@/types/enum/plan';
@@ -16,6 +16,10 @@ import { Plan } from '@/types/enum/plan';
 const mockGetBillingHistory = billingService.getBillingHistory as jest.Mock;
 
 describe('GET /users/history/:userId', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 200 with billing history for own account', async () => {
     const headers = mockAuthHeaders(mockLoginResponse.userId);
     const mockBilling = [

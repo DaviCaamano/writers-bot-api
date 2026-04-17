@@ -3,10 +3,13 @@ import pool from '@/config/database';
 import stripe from '@/config/stripe';
 import logger from '@/config/logger';
 import type { CreateUserBody, UpdateUserBody, SubscribeBody } from '@/schemas/user.schemas';
-import { PlanRow, UserRow } from '@/types/database';
+import { GenreRow, PlanRow, UserRow } from '@/types/database';
 import { EmailTakenError } from '@/constants/error/custom-errors';
 import { UserResponse } from '@/types/response';
 import { Plan } from '@/types/enum/plan';
+import { withTransaction } from '@/utils/database/with-transaction';
+import { PoolClient } from 'pg';
+import { withQuery } from '@/utils/database/with-query';
 
 const SALT_ROUNDS = 12;
 
@@ -25,11 +28,8 @@ export async function createUser(data: CreateUserBody): Promise<void> {
 }
 
 // Update user
-export async function updateUser(userId: string, data: UpdateUserBody): Promise<UserResponse> {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-
+export const updateUser = async (userId: string, data: UpdateUserBody): Promise<UserResponse> => {
+  return withTransaction(async (client: PoolClient) => {
     const updates: string[] = [];
     const values: (string | Date)[] = [];
     let paramIdx = 1;
@@ -66,131 +66,137 @@ export async function updateUser(userId: string, data: UpdateUserBody): Promise<
       }
     }
 
-    await client.query('COMMIT');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
+    const userQuery = client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]);
+    const genreQuery = client.query<GenreRow>('SELECT genre FROM genres WHERE user_id = $1', [
+      userId,
+    ]);
+    const planQuery = client.query<PlanRow>(
+      'SELECT plan_type FROM plans WHERE user_id = $1 AND is_active = TRUE LIMIT 1',
+      [userId],
+    );
 
-  const userResult = await pool.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]);
-  const user = userResult.rows[0];
-  const genreResult = await pool.query('SELECT genre FROM genres WHERE user_id = $1', [userId]);
-  const planResult = await pool.query<PlanRow>(
-    'SELECT plan_type FROM plans WHERE user_id = $1 AND is_active = TRUE LIMIT 1',
-    [userId],
-  );
+    const [userResult, genreResult, planResult] = await Promise.all([
+      userQuery,
+      genreQuery,
+      planQuery,
+    ]);
+    const user = userResult.rows[0];
+    logger.info({ userId, fields: Object.keys(data) }, 'User updated');
 
-  logger.info({ userId, fields: Object.keys(data) }, 'User updated');
-
-  return {
-    userId: user.user_id,
-    firstName: user.first_name,
-    lastName: user.last_name,
-    email: user.email,
-    genres: genreResult.rows.map((r) => r.genre),
-    plan: planResult.rows.length > 0 ? planResult.rows[0].plan_type : null,
-  };
-}
+    return {
+      userId: user.user_id,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      email: user.email,
+      genres: genreResult.rows.map((r) => r.genre),
+      plan: planResult.rows.length > 0 ? planResult.rows[0].plan_type : null,
+    };
+  });
+};
 
 // Genres
 export async function addGenres(userId: string, genres: string[]) {
-  for (const genre of genres) {
-    await pool.query(
-      'INSERT INTO genres (user_id, genre) VALUES ($1, $2) ON CONFLICT (user_id, genre) DO NOTHING',
-      [userId, genre],
-    );
-  }
+  return withQuery(async (client) => {
+    for (const genre of genres) {
+      await client.query(
+        'INSERT INTO genres (user_id, genre) VALUES ($1, $2) ON CONFLICT (user_id, genre) DO NOTHING',
+        [userId, genre],
+      );
+    }
 
-  const result = await pool.query('SELECT genre FROM genres WHERE user_id = $1 ORDER BY genre', [
-    userId,
-  ]);
-  return result.rows.map((r) => r.genre as string);
+    const result = await client.query<GenreRow>(
+      'SELECT genre FROM genres WHERE user_id = $1 ORDER BY genre',
+      [userId],
+    );
+    return result.rows.map((r) => r.genre as string);
+  });
 }
 
 // Delete user (GDPR / account deletion)
 export async function deleteUser(userId: string) {
   // All related tables cascade-delete from users.user_id
-  await pool.query('DELETE FROM users WHERE user_id = $1', [userId]);
-  logger.info({ userId }, 'User account deleted');
+  // await pool.query('DELETE FROM users WHERE user_id = $1', [userId]);
+  // logger.info({ userId }, 'User account deleted');
+  //TODO implement such that it emails me the requests users make for account deletion
+  console.warn(userId, 'User account deletion requested. Not implemented yet.');
 }
 
 // Subscribe
 export async function subscribe(userId: string, data: SubscribeBody) {
-  const { planType, yearPlan, paymentMethodId } = data;
-  const amountCents = await calculatePrice(userId, planType, yearPlan);
+  return withTransaction(async (client: PoolClient) => {
+    const { planType, yearPlan, paymentMethodId } = data;
+    const amountCents = await calculatePrice(userId, planType, yearPlan, client);
 
-  const userResult = await pool.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]);
-  const user = userResult.rows[0];
-
-  let stripeCustomerId = user.stripe_customer_id;
-  if (!stripeCustomerId) {
-    const customer = await stripe.customers.create({
-      email: user.email,
-      name: `${user.first_name} ${user.last_name}`,
-    });
-    stripeCustomerId = customer.id;
-    await pool.query('UPDATE users SET stripe_customer_id = $1 WHERE user_id = $2', [
-      stripeCustomerId,
+    const userResult = await client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [
       userId,
     ]);
-  }
+    const user = userResult.rows[0];
 
-  await stripe.paymentMethods.attach(paymentMethodId, { customer: stripeCustomerId });
+    let stripeCustomerId = user.stripe_customer_id;
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: `${user.first_name} ${user.last_name}`,
+      });
+      stripeCustomerId = customer.id;
+      await client.query('UPDATE users SET stripe_customer_id = $1 WHERE user_id = $2', [
+        stripeCustomerId,
+        userId,
+      ]);
+    }
 
-  const paymentIntent = await stripe.paymentIntents.create(
-    {
-      amount: amountCents,
-      currency: 'usd',
-      customer: stripeCustomerId,
-      payment_method: paymentMethodId,
-      confirm: true,
-      automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
-    },
-    { idempotencyKey: `subscribe_${userId}_${Date.now()}` },
-  );
+    await stripe.paymentMethods.attach(paymentMethodId, { customer: stripeCustomerId });
 
-  if (paymentIntent.status !== 'succeeded') {
-    logger.warn({ userId, status: paymentIntent.status }, 'Payment not succeeded');
-    throw new Error(`Payment failed with status: ${paymentIntent.status}`);
-  }
+    const paymentIntent = await stripe.paymentIntents.create(
+      {
+        amount: amountCents,
+        currency: 'usd',
+        customer: stripeCustomerId,
+        payment_method: paymentMethodId,
+        confirm: true,
+        automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
+      },
+      { idempotencyKey: `subscribe_${userId}_${Date.now()}` },
+    );
 
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    await client.query(
+    if (paymentIntent.status !== 'succeeded') {
+      logger.warn({ userId, status: paymentIntent.status }, 'Payment not succeeded');
+      throw new Error(`Payment failed with status: ${paymentIntent.status}`);
+    }
+
+    const updatePlanQuery = client.query(
       'UPDATE plans SET is_active = FALSE, updated_at = NOW() WHERE user_id = $1 AND is_active = TRUE',
       [userId],
     );
-    await client.query(
+    const insertPlanQuery = client.query(
       `INSERT INTO plans (user_id, plan_type, is_year_plan, is_active, stripe_subscription_id, start_date)
        VALUES ($1, $2, $3, TRUE, $4, NOW())`,
       [userId, planType, yearPlan, paymentIntent.id],
     );
-    await client.query(
+    const insertBillingQuery = client.query(
       `INSERT INTO billing (user_id, plan_type, is_year_plan, amount_cents, stripe_payment_intent_id)
        VALUES ($1, $2, $3, $4, $5)`,
       [userId, planType, yearPlan, amountCents, paymentIntent.id],
     );
-    await client.query('COMMIT');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
 
-  logger.info({ userId, planType, yearPlan, amountCents }, 'Subscription created');
+    await Promise.all([updatePlanQuery, insertPlanQuery, insertBillingQuery]);
 
-  return { amountCents, planType, yearPlan };
+    logger.info({ userId, planType, yearPlan, amountCents }, 'Subscription created');
+
+    return { amountCents, planType, yearPlan };
+  });
 }
 
 // Private helpers
-async function calculatePrice(userId: string, planType: Plan, yearPlan: boolean): Promise<number> {
+async function calculatePrice(
+  userId: string,
+  planType: Plan,
+  yearPlan: boolean,
+  client: PoolClient,
+): Promise<number> {
   if (yearPlan) return planType === Plan.pro ? 10000 : 30000;
 
-  const countResult = await pool.query(
+  const countResult = await client.query(
     'SELECT COUNT(*) as cnt FROM billing WHERE user_id = $1 AND plan_type = $2 AND is_year_plan = FALSE',
     [userId, planType],
   );

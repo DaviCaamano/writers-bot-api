@@ -24,6 +24,10 @@ const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTr
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 
 describe('fetchDocument', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should fetch a document by its ID', async () => {
     const mockClient = createMockClient();
     mockClient.query.mockResolvedValueOnce({
@@ -37,6 +41,10 @@ describe('fetchDocument', () => {
 });
 
 describe('upsertDocument', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should create a new document with a new world and story when no IDs are provided', async () => {
     const mockClient = createMockClient();
 
@@ -64,8 +72,7 @@ describe('upsertDocument', () => {
           world_id: MOCK_WORLD_ID,
         },
       ],
-    });
-    mockClient.query.mockResolvedValueOnce({}); // UPDATE
+    }).mockResolvedValueOnce({});
     mockFetchWorld.mockResolvedValueOnce(mockWorldResponse);
 
     mockWithTransaction.mockImplementation((callback) => callback(mockClient as any));

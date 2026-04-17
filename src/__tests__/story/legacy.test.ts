@@ -1,3 +1,5 @@
+import { mockDate } from '@/__tests__/constants/mock-basic';
+
 jest.mock('@/config/database');
 
 import type { WorldRow, StoryRow, DocumentRow } from '@/types/database';
@@ -7,7 +9,6 @@ import {
   MOCK_STORY_ID,
   MOCK_USER_ID,
   MOCK_WORLD_ID,
-  mockDate,
   mockDoc,
   mockStory,
   mockWorld,
@@ -15,6 +16,10 @@ import {
 import { mockPool } from '@/__tests__/constants/mock-database';
 
 describe('fetchLegacy', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return an empty array when user has no worlds', async () => {
     (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
     expect(await fetchLegacy(MOCK_USER_ID)).toEqual([]);

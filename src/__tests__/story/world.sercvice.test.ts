@@ -3,7 +3,6 @@ import {
   MOCK_STORY_ID,
   MOCK_USER_ID,
   MOCK_WORLD_ID,
-  mockDate,
   mockDoc,
   mockStory,
   mockWorld,
@@ -16,8 +15,13 @@ import { WorldNotFoundError } from '@/constants/error/custom-errors';
 import { fetchWorld, upsertWorld } from '@/services/story/world.service';
 import { DocumentRow, StoryRow } from '@/types/database';
 import { mockPool } from '@/__tests__/constants/mock-database';
+import { mockDate } from '@/__tests__/constants/mock-basic';
 
 describe('upsertWorld', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should insert a new world when no worldId is provided', async () => {
     (mockPool.query as jest.Mock)
       .mockResolvedValueOnce({ rows: [{ world_id: MOCK_WORLD_ID }] }) // INSERT worlds
@@ -69,6 +73,10 @@ describe('upsertWorld', () => {
 });
 
 describe('fetchWorld', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return null when the world does not exist', async () => {
     (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
 

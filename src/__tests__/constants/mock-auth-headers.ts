@@ -1,4 +1,4 @@
-import { mockLoginResponse } from '@/__tests__/constants/mock-login';
+import { mockLoginResponse } from '@/__tests__/constants/mock-user';
 import jwt from 'jsonwebtoken';
 import pool from '@/config/database';
 

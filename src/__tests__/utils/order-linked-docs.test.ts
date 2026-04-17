@@ -42,6 +42,10 @@ const linkedDoc3: DocumentResponse = {
 };
 
 describe('orderLinkedDocs', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return an empty array when there are no linked documents', () => {
     // Returns an empty array when given an empty array
     expect(orderLinkedDocs([], getId)).toEqual([]);

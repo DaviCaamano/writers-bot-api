@@ -11,7 +11,7 @@ import request from 'supertest';
 import app from '@/app';
 import * as userService from '@/services/user/user.service';
 import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
-import { mockStrongPassword } from '@/__tests__/constants/mock-login';
+import { mockStrongPassword } from '@/__tests__/constants/mock-user';
 
 const mockCreateUser = userService.createUser as jest.Mock;
 const mockAddGenres = userService.addGenres as jest.Mock;
@@ -29,6 +29,10 @@ const mockLoginResponse = {
 
 // POST /user/create
 describe('POST /user/create', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 400 when required fields are missing', async () => {
     const res = await request(app).post('/user/create').send({ email: 'bad' });
     expect(res.status).toBe(400);
@@ -86,6 +90,10 @@ describe('POST /user/create', () => {
 
 // POST /user/genres
 describe('POST /user/genres', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 401 without auth', async () => {
     const res = await request(app)
       .post('/user/genres')
@@ -116,6 +124,10 @@ describe('POST /user/genres', () => {
 
 // POST /user/deleteme
 describe('POST /user/deleteme', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 401 without auth', async () => {
     const res = await request(app).post('/user/deleteme').send();
     expect(res.status).toBe(401);

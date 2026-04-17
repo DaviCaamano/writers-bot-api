@@ -10,18 +10,22 @@ import {
   MOCK_STORY_ID,
   MOCK_USER_ID,
   MOCK_WORLD_ID,
-  mockDate,
   mockDoc,
   mockStory,
   mockStoryResponse,
 } from '@/__tests__/constants/mock-story';
 import { createMockClient } from '@/__tests__/constants/mock-database';
 import { PoolClient } from 'pg';
+import { mockDate } from '@/__tests__/constants/mock-basic';
 
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 
 describe('fetchStory', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should fetch a story by its ID', async () => {
     const mockClient = createMockClient();
     mockClient.query.mockResolvedValueOnce({ rows: [mockStory] });
@@ -33,6 +37,10 @@ describe('fetchStory', () => {
 });
 
 describe('fetchStoryWithDocuments', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return a story with its documents', async () => {
     const storyWithDocs = { ...mockStory, documents: [mockDoc] };
     const mockClient = createMockClient();
@@ -63,6 +71,10 @@ describe('fetchStoryWithDocuments', () => {
 });
 
 describe('upsertStory', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should create a new story with a new world when neither storyId nor worldId is provided', async () => {
     const mockTransactionClient = createMockClient();
     mockTransactionClient.query.mockResolvedValueOnce({ rows: [{ world_id: MOCK_WORLD_ID }] }); // INSERT world
