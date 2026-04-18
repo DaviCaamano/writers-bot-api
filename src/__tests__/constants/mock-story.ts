@@ -1,6 +1,5 @@
 import type { DocumentResponse, StoryResponse, WorldResponse } from '@/types/response';
 import type { DocumentRow, StoryRow, WorldRow } from '@/types/database';
-import { padArray } from '@/utils/pad-array';
 import { mockDate } from '@/__tests__/constants/mock-basic';
 export { mockPool } from '@/__tests__/constants/mock-database';
 
@@ -75,32 +74,34 @@ export const mockLegacyDocumentId = 'docId';
 
 export const mockStoryResponseList = (
   prefix: string,
-  length: number,
-  documentLengths: number[],
+  documentCounts: number[],
 ): StoryResponse[] => {
-  const docLengths = padArray(documentLengths, length, 0);
   const id = (suffix: number) => prefix + '-' + mockLegacyStoryIds + '-' + suffix;
+  const docLengths = documentCounts.length;
   return [
     {
       ...mockStoryResponse,
       storyId: id(0),
-      successorId: length > 0 ? id(1) : null,
-      documents: mockDocResponseList(prefix + 'doc0', docLengths[0]),
+      successorId: docLengths > 0 ? id(1) : null,
+      documents: mockDocResponseList(prefix + 'doc0', documentCounts[0]),
     },
-    ...(Array.from({ length: Math.max(0, length - 2) }) as number[]).map((index: number) => ({
+    ...(Array.from({ length: Math.max(0, docLengths - 2) }) as number[]).map((index: number) => ({
       ...mockStoryResponse,
       documentId: id(index + 1),
       predecessorId: id(index),
-      successorId: length - 2 > index ? id(index + 1) : null,
-      documents: mockDocResponseList(prefix + 'doc' + index + 1, docLengths[index + 1]),
+      successorId: docLengths - 2 > index ? id(index + 1) : null,
+      documents: mockDocResponseList(prefix + 'doc' + index + 1, documentCounts[index + 1]),
     })),
-    length > 1
+    docLengths > 1
       ? {
           ...mockStoryResponse,
-          documentId: id(length - 1),
-          predecessorId: id(Math.max(0, length - 2)),
+          documentId: id(docLengths - 1),
+          predecessorId: id(Math.max(0, docLengths - 2)),
           successorId: null,
-          documents: mockDocResponseList(prefix + 'doc' + (length - 1), docLengths[length - 1]),
+          documents: mockDocResponseList(
+            prefix + 'doc' + (docLengths - 1),
+            documentCounts[docLengths - 1],
+          ),
         }
       : undefined,
   ].filter(Boolean) as StoryResponse[];
@@ -130,8 +131,15 @@ export const mockDocResponseList = (prefix: string, length: number): DocumentRes
   ].filter(Boolean) as DocumentResponse[];
 };
 
-export const mockLegacy: WorldResponse[] = MOCK_WORLD_IDs.map((id) => ({
+const exampleDocumentPerStory = [
+  [0, 1, 2, 3, 4],
+  [0, 0, 0, 0],
+  [5, 6, 7, 8],
+  [1, 1, 1, 1],
+  [11, 22, 33, 44],
+];
+export const mockLegacy: WorldResponse[] = MOCK_WORLD_IDs.map((id, index) => ({
   ...mockWorldResponse,
   worldId: id,
-  stories: mockStoryResponseList(id, 5, [4, 3, 2, 1, 0]),
+  stories: mockStoryResponseList(id, exampleDocumentPerStory[index]),
 }));

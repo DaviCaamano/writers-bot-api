@@ -7,7 +7,7 @@ import { fetchLegacy } from '@/utils/story/world';
 import { InvalidCredentialsError } from '@/constants/error/custom-errors';
 import { withQuery } from '@/utils/database/with-query';
 import { LoginResponse } from '@/types/response';
-import { parseExpiration } from '@/utils/database/parseExpiration';
+import { parseExpiration } from '@/utils/database/parse-expiration';
 
 export const login = async (data: LoginBody): Promise<LoginResponse> => {
   return withQuery(async (client) => {
