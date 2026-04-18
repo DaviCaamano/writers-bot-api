@@ -26,6 +26,10 @@ export const mockClear = (tests: Tests) => {
       jest.clearAllMocks();
     });
 
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     tests();
   };
 };

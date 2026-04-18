@@ -5,7 +5,7 @@ import { Pool, PoolClient } from 'pg';
 
 export const mockPool = pool as jest.Mocked<Pool>;
 
-interface MockPoolClient extends PoolClient {
+export interface MockPoolClient extends PoolClient {
   query: jest.Mock;
   release: jest.Mock;
 }

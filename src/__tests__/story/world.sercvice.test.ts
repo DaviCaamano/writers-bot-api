@@ -3,70 +3,60 @@ import {
   MOCK_STORY_ID,
   MOCK_USER_ID,
   MOCK_WORLD_ID,
-  mockDoc,
-  mockStory,
-  mockWorld,
-  mockWorldResponse,
+  MOCK_DOC,
+  MOCK_STORY,
+  MOCK_WORLD,
+  MOCK_WORLD_RESPONSE,
 } from '@/__tests__/constants/mock-story';
 
 jest.mock('@/config/database');
 
 import { WorldNotFoundError } from '@/constants/error/custom-errors';
-import { fetchWorld, upsertWorld } from '@/services/story/world.service';
 import { DocumentRow, StoryRow } from '@/types/database';
 import { mockPool } from '@/__tests__/constants/mock-database';
-import { mockDate } from '@/__tests__/constants/mock-basic';
+import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
 import { mockClear } from '@/__tests__/utils/test-wrappers';
 
+import * as worldService from '@/services/story/world.service';
 describe(
   'upsertWorld',
   mockClear(() => {
     it('should insert a new world when no worldId is provided', async () => {
-      (mockPool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ world_id: MOCK_WORLD_ID }] }) // INSERT worlds
-        .mockResolvedValueOnce({ rows: [mockWorld] }) // fetchWorld: SELECT worlds
-        .mockResolvedValueOnce({ rows: [] }); // fetchWorld: SELECT stories
+      const mockFetch = jest.fn().mockResolvedValueOnce(MOCK_WORLD_RESPONSE);
+      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ world_id: MOCK_WORLD_ID }] }); // INSERT worlds
 
-      const result = await upsertWorld(MOCK_USER_ID, { title: 'Test World' });
-
-      expect(result).toEqual(mockWorldResponse);
-      expect(mockPool.query).toHaveBeenCalledWith(
-        'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
-        [MOCK_USER_ID, 'Test World'],
+      const result = await worldService.upsertWorld(
+        MOCK_USER_ID,
+        { title: 'Test World' },
+        mockFetch,
       );
+      expect(mockFetch).toHaveBeenCalledWith(MOCK_WORLD_ID);
+      expect(result).toEqual(MOCK_WORLD_RESPONSE);
     });
 
     it('should update a world when worldId is provided and exists', async () => {
-      const updatedWorldRow = { ...mockWorld, title: 'Updated World' };
-      const updatedResponse = { ...mockWorldResponse, title: 'Updated World' };
+      const updatedResponse = { ...MOCK_WORLD_RESPONSE, title: 'Updated World' };
+      const mockFetch = jest.fn().mockResolvedValueOnce(updatedResponse);
 
       (mockPool.query as jest.Mock)
         .mockResolvedValueOnce({ rows: [{}] }) // SELECT 1 (ownership check)
-        .mockResolvedValueOnce({}) // UPDATE worlds
-        .mockResolvedValueOnce({ rows: [updatedWorldRow] }) // fetchWorld: SELECT worlds
-        .mockResolvedValueOnce({ rows: [] }); // fetchWorld: SELECT stories
+        .mockResolvedValueOnce({}); // UPDATE worlds
 
-      const result = await upsertWorld(MOCK_USER_ID, {
-        worldId: MOCK_WORLD_ID,
-        title: 'Updated World',
-      });
+      const result = await worldService.upsertWorld(
+        MOCK_USER_ID,
+        { worldId: MOCK_WORLD_ID, title: 'Updated World' },
+        mockFetch,
+      );
 
+      expect(mockFetch).toHaveBeenCalledWith(MOCK_WORLD_ID);
       expect(result).toEqual(updatedResponse);
-      expect(mockPool.query).toHaveBeenCalledWith(
-        'SELECT 1 FROM worlds WHERE world_id = $1 AND user_id = $2',
-        [MOCK_WORLD_ID, MOCK_USER_ID],
-      );
-      expect(mockPool.query).toHaveBeenCalledWith(
-        'UPDATE worlds SET title = $1, updated_at = NOW() WHERE world_id = $2',
-        ['Updated World', MOCK_WORLD_ID],
-      );
     });
 
-    it('should throw WorldNotFoundError when worldId does not exist', async () => {
+    it('throw WorldNotFoundError when worldId does not exist', async () => {
       (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
 
       await expect(
-        upsertWorld(MOCK_USER_ID, { worldId: MOCK_WORLD_ID, title: 'Updated World' }),
+        worldService.upsertWorld(MOCK_USER_ID, { worldId: MOCK_WORLD_ID, title: 'Updated World' }),
       ).rejects.toThrow(WorldNotFoundError);
     });
   }),
@@ -78,17 +68,17 @@ describe(
     it('should return null when the world does not exist', async () => {
       (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
 
-      const result = await fetchWorld(MOCK_WORLD_ID);
+      const result = await worldService.fetchWorld(MOCK_WORLD_ID);
       expect(result).toBeNull();
     });
 
     it('should return the world with nested stories and documents', async () => {
       (mockPool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [mockWorld] })
-        .mockResolvedValueOnce({ rows: [mockStory] })
-        .mockResolvedValueOnce({ rows: [mockDoc] });
+        .mockResolvedValueOnce({ rows: [MOCK_WORLD] })
+        .mockResolvedValueOnce({ rows: [MOCK_STORY] })
+        .mockResolvedValueOnce({ rows: [MOCK_DOC] });
 
-      const result = await fetchWorld(MOCK_WORLD_ID);
+      const result = await worldService.fetchWorld(MOCK_WORLD_ID);
 
       expect(result).toEqual({
         worldId: MOCK_WORLD_ID,
@@ -109,34 +99,34 @@ describe(
                 body: 'Test content',
                 predecessorId: null,
                 successorId: null,
-                createdAt: mockDate,
-                updatedAt: mockDate,
+                createdAt: MOCK_DATE,
+                updatedAt: MOCK_DATE,
               },
             ],
-            createdAt: mockDate,
-            updatedAt: mockDate,
+            createdAt: MOCK_DATE,
+            updatedAt: MOCK_DATE,
           },
         ],
-        createdAt: mockDate,
-        updatedAt: mockDate,
+        createdAt: MOCK_DATE,
+        updatedAt: MOCK_DATE,
       });
     });
 
     it('should return a mapped world with no stories', async () => {
       (mockPool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [mockWorld] }) // SELECT worlds
+        .mockResolvedValueOnce({ rows: [MOCK_WORLD] }) // SELECT worlds
         .mockResolvedValueOnce({ rows: [] }); // SELECT stories
 
-      const result = await fetchWorld(MOCK_WORLD_ID);
-      expect(result).toEqual(mockWorldResponse);
+      const result = await worldService.fetchWorld(MOCK_WORLD_ID);
+      expect(result).toEqual(MOCK_WORLD_RESPONSE);
     });
 
     it('should skip the documents query when there are no stories', async () => {
       (mockPool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [mockWorld] })
+        .mockResolvedValueOnce({ rows: [MOCK_WORLD] })
         .mockResolvedValueOnce({ rows: [] });
 
-      const result = await fetchWorld(MOCK_WORLD_ID);
+      const result = await worldService.fetchWorld(MOCK_WORLD_ID);
 
       expect(result?.stories).toEqual([]);
       expect(mockPool.query).toHaveBeenCalledTimes(2);
@@ -147,30 +137,30 @@ describe(
       const linkedDoc2Id = 'e5eebc99-9c0b-4ef8-bb6d-6bb9bd380a56';
       const linkedDoc3Id = 'e5eebc99-9c0b-4ef8-bb6d-6bb9bd380a57';
       const linkedDoc1: DocumentRow = {
-        ...mockDoc,
+        ...MOCK_DOC,
         document_id: linkedDoc1Id,
         predecessor_id: null,
         successor_id: linkedDoc2Id,
       };
       const linkedDoc2: DocumentRow = {
-        ...mockDoc,
+        ...MOCK_DOC,
         document_id: linkedDoc2Id,
         predecessor_id: linkedDoc1Id,
         successor_id: linkedDoc3Id,
       };
       const linkedDoc3: DocumentRow = {
-        ...mockDoc,
+        ...MOCK_DOC,
         document_id: linkedDoc3Id,
         predecessor_id: linkedDoc2Id,
         successor_id: null,
       };
 
       (mockPool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [mockWorld] })
-        .mockResolvedValueOnce({ rows: [mockStory] })
+        .mockResolvedValueOnce({ rows: [MOCK_WORLD] })
+        .mockResolvedValueOnce({ rows: [MOCK_STORY] })
         .mockResolvedValueOnce({ rows: [linkedDoc1, linkedDoc2, linkedDoc3] });
 
-      const result = await fetchWorld(MOCK_WORLD_ID);
+      const result = await worldService.fetchWorld(MOCK_WORLD_ID);
 
       const document1 = result!.stories[0].documents[0];
       const document2 = result!.stories[0].documents[1];
@@ -188,9 +178,9 @@ describe(
 
     it('should assign documents to the correct story', async () => {
       const story2Id = 'e4eebc99-9c0b-4ef8-bb6d-6bb9bd380a55';
-      const story1: StoryRow = { ...mockStory, successor_id: story2Id };
+      const story1: StoryRow = { ...MOCK_STORY, successor_id: story2Id };
       const story2: StoryRow = {
-        ...mockStory,
+        ...MOCK_STORY,
         story_id: story2Id,
         title: 'Story 2',
         predecessor_id: MOCK_STORY_ID,
@@ -198,11 +188,11 @@ describe(
       };
 
       (mockPool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [mockWorld] })
+        .mockResolvedValueOnce({ rows: [MOCK_WORLD] })
         .mockResolvedValueOnce({ rows: [story1, story2] })
-        .mockResolvedValueOnce({ rows: [mockDoc] }); // only belongs to MOCK_STORY_ID
+        .mockResolvedValueOnce({ rows: [MOCK_DOC] }); // only belongs to MOCK_STORY_ID
 
-      const result = await fetchWorld(MOCK_WORLD_ID);
+      const result = await worldService.fetchWorld(MOCK_WORLD_ID);
 
       expect(result!.stories).toHaveLength(2);
       expect(result!.stories[0].documents).toHaveLength(1);

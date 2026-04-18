@@ -47,7 +47,7 @@ describe(
       await expect(createUser(mockNewUser)).resolves.not.toThrow();
     });
 
-    it('should throw error if email is taken', async () => {
+    it('throw EmailTakenError error if email is taken', async () => {
       (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [mockUser] });
       await expect(createUser(mockNewUser)).rejects.toThrow(EmailTakenError);
     });
@@ -124,7 +124,7 @@ describe(
       await expect(subscribe(mockUserId, mockSubscriptionRequest)).resolves.not.toThrow();
     });
 
-    it('should throw error if stripe paymentIntent failed', async () => {
+    it('throw StripePaymentFailed error if stripe paymentIntent failed', async () => {
       const mockClient = createMockClient();
       mockClient.query
         .mockResolvedValueOnce({ rows: [{ cnt: '0' }] })

@@ -13,7 +13,6 @@ import {
   mockLoginEmail,
   mockLoginResponse,
   mockStrongPassword,
-  mockUser,
 } from '@/__tests__/constants/mock-user';
 import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
 import { mockClear } from '@/__tests__/utils/test-wrappers';

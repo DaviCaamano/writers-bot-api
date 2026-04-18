@@ -8,7 +8,7 @@ import {
   mockStripeCustomerId,
   mockStripeSubscriptionId,
 } from '@/__tests__/constants/mock-stripe';
-import { mockDate } from '@/__tests__/constants/mock-basic';
+import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
 
 export const mockLoginEmail = 'jane@example.com';
 export const mockUserId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
@@ -30,8 +30,8 @@ export const mockUser: UserRow = {
   last_name: mockLoginLastName,
   password_hash: mockHashedPassword,
   stripe_customer_id: mockStripeCustomerId,
-  created_at: mockDate,
-  updated_at: mockDate,
+  created_at: MOCK_DATE,
+  updated_at: MOCK_DATE,
 };
 
 export const mockNewUser: CreateUserBody = {
@@ -62,7 +62,7 @@ export const mockGenre: GenreRow = {
   genre_id: mockGenreId,
   user_id: mockUserId,
   genre: mockGenreField,
-  created_at: mockDate,
+  created_at: MOCK_DATE,
 };
 
 export const mockPlan: PlanRow = {
@@ -72,10 +72,10 @@ export const mockPlan: PlanRow = {
   is_year_plan: false,
   is_active: true,
   stripe_subscription_id: mockStripeSubscriptionId,
-  start_date: mockDate,
-  end_date: mockDate,
-  created_at: mockDate,
-  updated_at: mockDate,
+  start_date: MOCK_DATE,
+  end_date: MOCK_DATE,
+  created_at: MOCK_DATE,
+  updated_at: MOCK_DATE,
 };
 
 export const mockSubscriptionRequest: SubscribeBody = {

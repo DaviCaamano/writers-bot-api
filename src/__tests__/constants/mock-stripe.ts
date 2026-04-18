@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { mockDate } from '@/__tests__/constants/mock-basic';
+import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
 
 export const mockStripeClientSecret = 'pi_1234567890';
 export const mockStripeName = 'jane doe';
@@ -83,7 +83,7 @@ export const mockStripeAccount: Stripe.Account = {
     type: 'application',
   },
   country: 'US',
-  created: mockDate.getTime(),
+  created: MOCK_DATE.getTime(),
   default_currency: 'usd',
   details_submitted: true,
   email: mockStripeEmail,
@@ -143,7 +143,7 @@ export const mockStripeAccount: Stripe.Account = {
     treasury: { tos_acceptance: { date: null, ip: null } },
   },
   tos_acceptance: {
-    date: mockDate.getTime(),
+    date: MOCK_DATE.getTime(),
     ip: '127.0.0.1',
     user_agent: undefined,
   },
@@ -172,7 +172,7 @@ export const mockStripCustomer: Stripe.Customer = {
       using_merchant_default: true,
     },
   },
-  created: mockDate.getTime(),
+  created: MOCK_DATE.getTime(),
   default_source: 'default_payment_source',
   description: 'test stripe customer',
   email: mockStripeEmail,
@@ -201,7 +201,7 @@ export const mockStripeInvoice: Stripe.Invoice = {
   billing_reason: 'subscription_create',
   charge: null,
   collection_method: 'charge_automatically',
-  created: mockDate.getTime(),
+  created: MOCK_DATE.getTime(),
   currency: 'usd',
   custom_fields: null,
   customer: mockStripeCustomerId,
@@ -219,7 +219,7 @@ export const mockStripeInvoice: Stripe.Invoice = {
   discount: null,
   discounts: [],
   due_date: null,
-  effective_at: mockDate.getTime(),
+  effective_at: MOCK_DATE.getTime(),
   ending_balance: 0,
   footer: null,
   from_invoice: null,
@@ -248,8 +248,8 @@ export const mockStripeInvoice: Stripe.Invoice = {
     payment_method_options: null,
     payment_method_types: null,
   },
-  period_end: mockDate.getTime(),
-  period_start: mockDate.getTime(),
+  period_end: MOCK_DATE.getTime(),
+  period_start: MOCK_DATE.getTime(),
   post_payment_credit_notes_amount: 0,
   pre_payment_credit_notes_amount: 0,
   object: 'invoice',
@@ -262,9 +262,9 @@ export const mockStripeInvoice: Stripe.Invoice = {
   statement_descriptor: null,
   status: 'paid',
   status_transitions: {
-    finalized_at: mockDate.getTime(),
+    finalized_at: MOCK_DATE.getTime(),
     marked_uncollectible_at: null,
-    paid_at: mockDate.getTime(),
+    paid_at: MOCK_DATE.getTime(),
     voided_at: null,
   },
   subscription: mockStripeSubscriptionId,
@@ -279,7 +279,7 @@ export const mockStripeInvoice: Stripe.Invoice = {
   total_pretax_credit_amounts: null,
   total_tax_amounts: [],
   transfer_data: null,
-  webhooks_delivered_at: mockDate.getTime(),
+  webhooks_delivered_at: MOCK_DATE.getTime(),
 };
 
 export const mockStripeChargeId = 'ch_1234567890';
@@ -302,7 +302,7 @@ export const mockStripeCharge: Stripe.Charge = {
   },
   calculated_statement_descriptor: null,
   captured: true,
-  created: mockDate.getTime(),
+  created: MOCK_DATE.getTime(),
   currency: 'usd',
   customer: mockStripeCustomerId,
   description: null,

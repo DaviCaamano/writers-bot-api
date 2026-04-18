@@ -40,18 +40,13 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
     if (documentId) {
       const existingDoc = await client.query<DocumentRow & { user_id: string; world_id: string }>(
         `SELECT d.*, w.user_id, s.world_id FROM documents d
-         JOIN stories s ON s.story_id = d.story_id
-         JOIN worlds w ON w.world_id = s.world_id
-         WHERE d.document_id = $1`,
-        [documentId],
+         JOIN stories s ON s.story_id = d.story_id 
+         JOIN (SELECT w2.world_id, w2.user_id FROM worlds w2 WHERE w2.user_id = $1) w ON w.world_id = s.world_id
+         WHERE d.document_id = $2`,
+        [userId, documentId],
       );
 
       if (existingDoc.rows.length === 0) {
-        throw new DocumentNotFoundError();
-      }
-
-      // Verify the user owns this document
-      if (existingDoc.rows[0].user_id !== userId) {
         throw new DocumentNotFoundError();
       }
 

@@ -53,7 +53,7 @@ describe(
       expect(response).toMatchObject(mockLoginResponse);
     });
 
-    it('should throw error if email does not exist', async () => {
+    it('throw InvalidCredentialsError error if email does not exist', async () => {
       const mockClient = createMockClient();
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
       mockClient.query.mockResolvedValueOnce({ rows: [] });
@@ -66,7 +66,7 @@ describe(
       ).rejects.toThrow(InvalidCredentialsError);
     });
 
-    it('should throw error if password is incorrect', async () => {
+    it('throw InvalidCredentialsError error if password is incorrect', async () => {
       const mockClient = createMockClient();
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
       mockClient.query.mockResolvedValueOnce({ rows: [mockUser] });

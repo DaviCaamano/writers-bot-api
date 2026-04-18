@@ -16,7 +16,7 @@ import * as storyService from '@/services/story/story.service';
 import * as worldService from '@/services/story/world.service';
 import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
 import { testAuth } from '@/__tests__/utils/test-wrappers';
-import { mockWorldResponse } from '@/__tests__/constants/mock-story';
+import { MOCK_WORLD_RESPONSE } from '@/__tests__/constants/mock-story';
 
 const mockUpsertDocument = documentService.upsertDocument as jest.Mock;
 const mockUpsertStory = storyService.upsertStory as jest.Mock;
@@ -36,7 +36,7 @@ describe(
     });
 
     it('returns 200 with world data on success', async () => {
-      mockUpsertWorld.mockResolvedValueOnce(mockWorldResponse);
+      mockUpsertWorld.mockResolvedValueOnce(MOCK_WORLD_RESPONSE);
 
       const res = await request(app)
         .post('/story/world')
@@ -71,7 +71,7 @@ describe(
     });
 
     it('returns 200 with world data on success', async () => {
-      mockUpsertStory.mockResolvedValueOnce(mockWorldResponse);
+      mockUpsertStory.mockResolvedValueOnce(MOCK_WORLD_RESPONSE);
 
       const res = await request(app)
         .post('/story/story')
@@ -110,7 +110,7 @@ describe(
     });
 
     it('returns 200 with world data on success', async () => {
-      mockUpsertDocument.mockResolvedValueOnce(mockWorldResponse);
+      mockUpsertDocument.mockResolvedValueOnce(MOCK_WORLD_RESPONSE);
 
       const res = await request(app)
         .post('/story/document')

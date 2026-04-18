@@ -5,10 +5,11 @@ import pool from '@/config/database';
 import { DocumentRow, StoryRow, StoryRowWithDocuments, WorldRow } from '@/types/database';
 import { mapWorldResponse } from '@/utils/story/map-story';
 
-export async function upsertWorld(
+export const upsertWorld = async (
   userId: string,
   data: UpsertWorldBody,
-): Promise<WorldResponse | null> {
+  fetchWorldResponse = fetchWorld,
+): Promise<WorldResponse | null> => {
   const { worldId, title } = data;
 
   if (worldId) {
@@ -23,20 +24,20 @@ export async function upsertWorld(
       title,
       worldId,
     ]);
-    return fetchWorld(worldId);
+    return fetchWorldResponse(worldId);
   } else {
     const newWorld = await pool.query<WorldRow>(
       'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
       [userId, title],
     );
-    return fetchWorld(newWorld.rows[0].world_id);
+    return fetchWorldResponse(newWorld.rows[0].world_id);
   }
-}
+};
 
 /**
  * Fetches a single world with all nested stories and documents.
  */
-export async function fetchWorld(worldId: string): Promise<WorldResponse | null> {
+export const fetchWorld = async (worldId: string): Promise<WorldResponse | null> => {
   const worldResult = await pool.query<WorldRow>('SELECT * FROM worlds WHERE world_id = $1', [
     worldId,
   ]);
@@ -74,4 +75,4 @@ export async function fetchWorld(worldId: string): Promise<WorldResponse | null>
   }));
 
   return mapWorldResponse(world, stories);
-}
+};

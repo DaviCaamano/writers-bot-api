@@ -1,24 +1,23 @@
 import type { UpsertStoryBody } from '@/schemas/story.schemas';
 import { withTransaction } from '@/utils/database/with-transaction';
 import { StoryRow, StoryRowWithDocuments } from '@/types/database';
-import { WorldNotFoundError } from '@/constants/error/custom-errors';
+import { StoryNotFoundError, WorldNotFoundError } from '@/constants/error/custom-errors';
 import { withQuery } from '@/utils/database/with-query';
 import { StoryResponse } from '@/types/response';
 import { mapStoryResponse } from '@/utils/story/map-story';
+import pool from '@/config/database';
 
 export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments> => {
-  return withQuery<StoryRowWithDocuments>(async (client) => {
-    const result = await client.query<StoryRowWithDocuments>(
-      `SELECT *
+  const result = await pool.query<StoryRowWithDocuments>(
+    `SELECT *
       FROM stories s
       WHERE s.story_id = $1;`,
-      [storyId],
-    );
-    if (result.rows.length === 0) {
-      throw new Error('Story not found');
-    }
-    return result.rows[0];
-  });
+    [storyId],
+  );
+  if (result.rows.length === 0) {
+    throw new StoryNotFoundError();
+  }
+  return result.rows[0];
 };
 
 export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRowWithDocuments> => {
@@ -37,7 +36,7 @@ export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRow
       [storyId],
     );
     if (result.rows.length === 0) {
-      throw new Error('Story not found');
+      throw new StoryNotFoundError();
     }
     return result.rows[0];
   });
@@ -58,29 +57,33 @@ export async function upsertStory(userId: string, data: UpsertStoryBody): Promis
         [storyId, userId],
       );
 
-      if (existing.rows.length > 0) {
+      if (existing.rows.length === 0) {
+        throw new StoryNotFoundError();
+      }
+
+      if (title && title !== existing.rows[0].title) {
         await client.query(
           'UPDATE stories SET title = $1, updated_at = NOW() WHERE story_id = $2',
           [title, storyId],
         );
-        resultWorldId = existing.rows[0].world_id;
-
-        if (worldId && worldId !== resultWorldId) {
-          const targetWorld = await client.query(
-            'SELECT 1 FROM worlds WHERE world_id = $1 AND user_id = $2',
-            [worldId, userId],
-          );
-          if (targetWorld.rows.length === 0) {
-            throw new WorldNotFoundError();
-          }
-          await client.query(
-            'UPDATE stories SET world_id = $1, updated_at = NOW() WHERE story_id = $2',
-            [worldId, storyId],
-          );
-        }
-
-        return mapStoryResponse(await fetchStory(storyId));
       }
+      resultWorldId = existing.rows[0].world_id;
+
+      if (worldId && worldId !== resultWorldId) {
+        const targetWorld = await client.query(
+          'SELECT 1 FROM worlds WHERE world_id = $1 AND user_id = $2',
+          [worldId, userId],
+        );
+        if (targetWorld.rows.length === 0) {
+          throw new WorldNotFoundError();
+        }
+        await client.query(
+          'UPDATE stories SET world_id = $1, updated_at = NOW() WHERE story_id = $2',
+          [worldId, storyId],
+        );
+      }
+
+      return mapStoryResponse(await fetchStory(storyId));
     }
 
     if (worldId) {
