@@ -33,6 +33,7 @@ import {
   InvalidCredentialsError,
   StripePaymentFailed,
 } from '@/constants/error/custom-errors';
+import { UserResponse } from '@/types/response';
 
 const router = Router();
 
@@ -68,18 +69,18 @@ router.post(
   '/create',
   createAccountLimiter,
   validate(CreateUserSchema),
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: Request, res: Response<CreateUserBody & { status: string }>): Promise<void> => {
+    const user: CreateUserBody = req.body;
     try {
-      await createUser(req.body as CreateUserBody);
+      await createUser(user);
     } catch (err) {
       if (err instanceof EmailTakenError) {
         // Return identical response to prevent email enumeration
-        res.status(201).json({ status: 'ok' });
-        return;
+        res.status(201).json({ status: 'ok', ...user });
       }
       throw err;
     }
-    res.status(201).json({ status: 'ok' });
+    res.status(200).json({ status: 'ok', ...user });
   },
 );
 
@@ -89,9 +90,8 @@ router.post(
   authMiddleware,
   generalLimiter,
   validate(UpdateUserSchema),
-  async (req: AuthRequest, res: Response): Promise<void> => {
-    const result = await updateUser(req.userId!, req.body as UpdateUserBody);
-    res.json(result);
+  async (req: AuthRequest, res: Response<UserResponse>): Promise<void> => {
+    res.json(await updateUser(req.userId!, req.body as UpdateUserBody));
   },
 );
 
@@ -101,10 +101,9 @@ router.post(
   authMiddleware,
   generalLimiter,
   validate(GenresSchema),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  async (req: AuthRequest, res: Response<{ genres: string[] }>): Promise<void> => {
     const { genres } = req.body as GenresBody;
-    const result = await addGenres(req.userId!, genres);
-    res.json({ genres: result });
+    res.json({ genres: await addGenres(req.userId!, genres) });
   },
 );
 

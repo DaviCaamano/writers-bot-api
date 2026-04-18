@@ -2,33 +2,31 @@ import { DocumentRow, StoryRow } from '@/types/database';
 import { UpsertDocumentBody } from '@/schemas/story.schemas';
 import { withTransaction } from '@/utils/database/with-transaction';
 import { DocumentNotFoundError, StoryNotFoundError } from '@/constants/error/custom-errors';
-import { withQuery } from '@/utils/database/with-query';
 import { DocumentResponse } from '@/types/response';
 import { fetchWorld } from '@/services/story/world.service';
+import pool from '@/config/database';
 
 export async function fetchDocument(documentId: string): Promise<DocumentResponse> {
-  return withQuery<DocumentResponse>(async (client) => {
-    const result = await client.query<DocumentRow>(
-      `SELECT d.*, s.world_id FROM documents d
+  const result = await pool.query<DocumentRow>(
+    `SELECT d.*, s.world_id FROM documents d
      JOIN stories s ON s.story_id = d.story_id
      WHERE d.document_id = $1`,
-      [documentId],
-    );
-    if (result.rows.length === 0) {
-      throw new DocumentNotFoundError();
-    }
-    const row = result.rows[0];
-    return {
-      documentId: row.document_id,
-      storyId: row.story_id,
-      title: row.title,
-      body: row.body ?? '',
-      predecessorId: row.predecessor_id,
-      successorId: row.successor_id,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
-  });
+    [documentId],
+  );
+  if (result.rows.length === 0) {
+    throw new DocumentNotFoundError();
+  }
+  const row = result.rows[0];
+  return {
+    documentId: row.document_id,
+    storyId: row.story_id,
+    title: row.title,
+    body: row.body ?? '',
+    predecessorId: row.predecessor_id,
+    successorId: row.successor_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
 export async function upsertDocument(userId: string, data: UpsertDocumentBody) {

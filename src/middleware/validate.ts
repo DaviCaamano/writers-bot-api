@@ -12,7 +12,7 @@ export const validate =
     const result = schema.safeParse(req.body);
     if (!result.success) {
       res.status(400).json({
-        error: 'Validation failed',
+        error: 'Invalid email or password',
         details: formatErrors(result.error),
       });
       return;

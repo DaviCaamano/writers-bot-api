@@ -36,7 +36,7 @@ describe(
     it('returns 400 when required fields are missing', async () => {
       const res = await request(app).post('/user/create').send({ email: 'bad' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toBe('Validation failed');
+      expect(res.body.error).toBe('Invalid email or password');
     });
 
     it('returns 400 when email is invalid', async () => {
@@ -83,7 +83,7 @@ describe(
         email: 'jane@example.com',
         password: mockStrongPassword,
       });
-      expect(res.status).toBe(201);
+      expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
     });
   }),
