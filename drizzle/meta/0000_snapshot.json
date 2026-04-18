@@ -78,12 +78,8 @@
           "name": "authentication_user_id_users_user_id_fk",
           "tableFrom": "authentication",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -93,9 +89,7 @@
         "authentication_token_unique": {
           "name": "authentication_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -196,12 +190,8 @@
           "name": "billing_user_id_users_user_id_fk",
           "tableFrom": "billing",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -321,12 +311,8 @@
           "name": "documents_story_id_stories_story_id_fk",
           "tableFrom": "documents",
           "tableTo": "stories",
-          "columnsFrom": [
-            "story_id"
-          ],
-          "columnsTo": [
-            "story_id"
-          ],
+          "columnsFrom": ["story_id"],
+          "columnsTo": ["story_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -334,12 +320,8 @@
           "name": "documents_predecessor_id_documents_document_id_fk",
           "tableFrom": "documents",
           "tableTo": "documents",
-          "columnsFrom": [
-            "predecessor_id"
-          ],
-          "columnsTo": [
-            "document_id"
-          ],
+          "columnsFrom": ["predecessor_id"],
+          "columnsTo": ["document_id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -347,12 +329,8 @@
           "name": "documents_successor_id_documents_document_id_fk",
           "tableFrom": "documents",
           "tableTo": "documents",
-          "columnsFrom": [
-            "successor_id"
-          ],
-          "columnsTo": [
-            "document_id"
-          ],
+          "columnsFrom": ["successor_id"],
+          "columnsTo": ["document_id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -446,12 +424,8 @@
           "name": "genres_user_id_users_user_id_fk",
           "tableFrom": "genres",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -572,12 +546,8 @@
           "name": "plans_user_id_users_user_id_fk",
           "tableFrom": "plans",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -648,12 +618,8 @@
           "name": "stories_world_id_worlds_world_id_fk",
           "tableFrom": "stories",
           "tableTo": "worlds",
-          "columnsFrom": [
-            "world_id"
-          ],
-          "columnsTo": [
-            "world_id"
-          ],
+          "columnsFrom": ["world_id"],
+          "columnsTo": ["world_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -727,16 +693,12 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "users_stripe_customer_id_unique": {
           "name": "users_stripe_customer_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "stripe_customer_id"
-          ]
+          "columns": ["stripe_customer_id"]
         }
       },
       "policies": {},
@@ -803,12 +765,8 @@
           "name": "worlds_user_id_users_user_id_fk",
           "tableFrom": "worlds",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -824,10 +782,7 @@
     "public.plan_type": {
       "name": "plan_type",
       "schema": "public",
-      "values": [
-        "pro-plan",
-        "max-plan"
-      ]
+      "values": ["pro-plan", "max-plan"]
     }
   },
   "schemas": {},

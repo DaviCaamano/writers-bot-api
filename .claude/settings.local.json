@@ -1,9 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(npx tsc:*)",
-      "Bash(echo \"exit:$?\")",
-      "Bash(npx jest:*)"
-    ]
+    "allow": ["Bash(npx tsc:*)", "Bash(echo \"exit:$?\")", "Bash(npx jest:*)"]
   }
 }
