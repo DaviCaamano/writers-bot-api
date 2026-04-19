@@ -18,12 +18,12 @@ describe(
       const headers = mockAuthHeaders(MOCK_USER_ID);
       mockGetBillingHistory.mockResolvedValueOnce([MOCK_BILLING_RESPONSE]);
 
-      const res = await request(app)
-        .get(`/billing/history/${MOCK_USER_ID}`)
-        .set(headers);
+      const res = await request(app).get(`/billing/history/${MOCK_USER_ID}`).set(headers);
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual([{ ...MOCK_BILLING_RESPONSE, billedAt: MOCK_BILLING_RESPONSE.billedAt.toISOString() }]);
+      expect(res.body).toEqual([
+        { ...MOCK_BILLING_RESPONSE, billedAt: MOCK_BILLING_RESPONSE.billedAt.toISOString() },
+      ]);
       expect(mockGetBillingHistory).toHaveBeenCalledWith(MOCK_USER_ID);
     });
 

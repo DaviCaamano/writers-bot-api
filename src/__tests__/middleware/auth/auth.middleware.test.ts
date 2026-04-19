@@ -1,4 +1,3 @@
-
 jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 import { mockPool } from '@/__tests__/constants/mock-story';
 
@@ -10,6 +9,13 @@ import { mockClear } from '@/__tests__/utils/test-wrappers';
 describe(
   'Auth Middleware',
   mockClear(() => {
+    describe('Unprotected route returns without auth middleware', () => {
+      it('returns 200', async () => {
+        const res = await request(app).get('/health');
+        expect(res.status).toBe(200);
+      });
+    });
+
     describe('Protected route without token', () => {
       it('returns 401 when Authorization header is missing', async () => {
         const res = await request(app).post('/user/logout').send({ userId: 'some-id' });
