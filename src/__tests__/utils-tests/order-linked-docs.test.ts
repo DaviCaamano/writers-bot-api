@@ -1,9 +1,7 @@
 import { orderLinkedDocs } from '@/utils/order-linked-docs';
 import { DocumentResponse } from '@/types/response';
-
-const MOCK_STORY_ID = 'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33';
-const MOCK_DOC_ID = 'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44';
-const mockDate = new Date('2026-01-01T00:00:00Z');
+import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
+import { MOCK_DOC_ID, MOCK_STORY_ID } from '@/__tests__/constants/mock-story';
 
 const mockDoc: DocumentResponse = {
   documentId: MOCK_DOC_ID,
@@ -12,8 +10,8 @@ const mockDoc: DocumentResponse = {
   body: 'Test content',
   predecessorId: null,
   successorId: null,
-  createdAt: mockDate,
-  updatedAt: mockDate,
+  createdAt: MOCK_DATE,
+  updatedAt: MOCK_DATE,
 };
 const getId = (doc: DocumentResponse) => doc.documentId;
 

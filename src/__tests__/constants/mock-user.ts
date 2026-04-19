@@ -1,4 +1,3 @@
-import { mockLegacy } from '@/__tests__/constants/mock-story';
 import { LoginResponse } from '@/types/response';
 import { GenreRow, PlanRow, UserRow } from '@/types/database';
 import { Plan } from '@/types/enum/plan';
@@ -9,6 +8,7 @@ import {
   mockStripeSubscriptionId,
 } from '@/__tests__/constants/mock-stripe';
 import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
+import { mockLegacyResponse } from '@/__tests__/utils/mock-linked-documents';
 
 export const mockLoginEmail = 'jane@example.com';
 export const mockUserId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
@@ -54,7 +54,7 @@ export const mockLoginResponse: LoginResponse = {
   plan: mockLoginPlan,
   firstName: mockLoginFirstName,
   lastName: mockLoginLastName,
-  legacy: mockLegacy,
+  legacy: mockLegacyResponse(),
   token: mockLoginToken,
 };
 
