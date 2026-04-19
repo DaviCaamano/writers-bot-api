@@ -1,4 +1,4 @@
-import { LoginResponse } from '@/types/response';
+import { BillingResponse, LoginResponse } from '@/types/response';
 import { BillingRow, GenreRow, PlanRow, UserRow } from '@/types/database';
 import { Plan } from '@/types/enum/plan';
 import { CreateUserBody, SubscribeBody, UpdateUserBody } from '@/schemas/user.schemas';
@@ -95,4 +95,12 @@ export const MOCK_BILLING_ROW: BillingRow = {
   stripe_invoice_id: MOCK_STRIPE_INVOICE_ID,
   stripe_payment_intent_id: MOCK_STRIPE_PAYMENT_INTENT_ID,
   billed_at: MOCK_DATE,
+};
+
+export const MOCK_BILLING_RESPONSE: BillingResponse = {
+  billingId: MOCK_BILLING_ID,
+  planType: Plan.pro,
+  isYearPlan: false,
+  amountCents: 152315,
+  billedAt: MOCK_DATE,
 };

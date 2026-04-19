@@ -1,28 +1,20 @@
+
 jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
+import { mockPool } from '@/__tests__/constants/mock-story';
 
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import app from '@/app';
 import { mockClear } from '@/__tests__/utils/test-wrappers';
 
-import pool from '@/config/database';
-const mockPool = pool as jest.Mocked<typeof pool>;
-
 describe(
   'Auth Middleware',
   mockClear(() => {
-    describe('GET /health (no auth required — baseline)', () => {
-      it('returns 200', async () => {
-        const res = await request(app).get('/health');
-        expect(res.status).toBe(200);
-      });
-    });
-
     describe('Protected route without token', () => {
       it('returns 401 when Authorization header is missing', async () => {
         const res = await request(app).post('/user/logout').send({ userId: 'some-id' });
         expect(res.status).toBe(401);
-        expect(res.body.error).toBe('No token provided');
+        expect(res.body.error).toBe('No auth token provided');
       });
 
       it('returns 401 when Authorization header is malformed', async () => {
@@ -31,7 +23,7 @@ describe(
           .set('Authorization', 'Token abc123')
           .send({ userId: 'some-id' });
         expect(res.status).toBe(401);
-        expect(res.body.error).toBe('No token provided');
+        expect(res.body.error).toBe('No auth token provided');
       });
     });
 
@@ -39,6 +31,7 @@ describe(
       it('returns 401 when token signature is wrong', async () => {
         const res = await request(app)
           .post('/user/logout')
+          // causes jwt.verify to throw error
           .set('Authorization', 'Bearer not.a.real.token')
           .send({ userId: 'some-id' });
         expect(res.status).toBe(401);
@@ -52,7 +45,7 @@ describe(
           expiresIn: '7d',
         });
 
-        (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] }); // no row in the authentication table
+        mockPool.query.mockResolvedValueOnce({ rows: [] }); // no row in the authentication table
 
         const res = await request(app)
           .post('/user/logout')

@@ -10,7 +10,7 @@ export const authMiddleware = async (
 ): Promise<void> => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'No token provided' });
+    res.status(401).json({ error: 'No auth token provided' });
     return;
   }
 

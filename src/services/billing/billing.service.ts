@@ -1,6 +1,7 @@
 import pool from '@/config/database';
 import { BillingRow } from '@/types/database';
 import { BillingResponse } from '@/types/response';
+import { mapBilling } from '@/utils/user/map-user';
 
 export async function getBillingHistory(userId: string): Promise<BillingResponse[]> {
   const result = await pool.query<BillingRow>(
@@ -10,11 +11,5 @@ export async function getBillingHistory(userId: string): Promise<BillingResponse
     [userId],
   );
 
-  return result.rows.map((b) => ({
-    billingId: b.billing_id,
-    planType: b.plan_type,
-    isYearPlan: b.is_year_plan,
-    amountCents: b.amount_cents,
-    billedAt: b.billed_at,
-  }));
+  return result.rows.map(mapBilling);
 }
