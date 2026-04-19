@@ -33,7 +33,7 @@ import {
   InvalidCredentialsError,
   StripePaymentFailed,
 } from '@/constants/error/custom-errors';
-import { UserResponse } from '@/types/response';
+import { LoginResponse, LogoutResponse, RouteResponse, UserResponse } from '@/types/response';
 
 const router = Router();
 
@@ -42,7 +42,7 @@ router.post(
   '/login',
   loginLimiter,
   validate(LoginSchema),
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: Request, res: RouteResponse<LoginResponse>) => {
     try {
       const result = await login(req.body as LoginBody);
       res.json(result);
@@ -57,10 +57,14 @@ router.post(
 );
 
 // Logout (revokes only the current session token)
-router.post('/logout', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  await logout(req.token!);
-  res.json({ status: 'ok' });
-});
+router.post(
+  '/logout',
+  authMiddleware,
+  async (req: AuthRequest, res: RouteResponse<LogoutResponse>) => {
+    await logout(req.token!);
+    res.json({ status: 'ok' });
+  },
+);
 
 // Create account
 // Returns the same response whether the email exists or not to prevent enumeration.
@@ -69,7 +73,7 @@ router.post(
   '/create',
   createAccountLimiter,
   validate(CreateUserSchema),
-  async (req: Request, res: Response<CreateUserBody & { status: string }>): Promise<void> => {
+  async (req: Request, res: RouteResponse<{ status: string }>): Promise<void> => {
     const user: CreateUserBody = req.body;
     try {
       await createUser(user);

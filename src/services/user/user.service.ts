@@ -20,10 +20,11 @@ export async function createUser(data: CreateUserBody): Promise<void> {
 
   const passwordHash = await bcrypt.hash(data.password, SALT_ROUNDS);
   await pool.query(
-    'INSERT INTO users (first_name, last_name, email, password_hash) VALUES ($1, $2, $3, $4)',
+    `INSERT INTO users 
+    (first_name, last_name, email, password_hash) 
+    VALUES ($1, $2, $3, $4)`,
     [data.firstName, data.lastName, data.email, passwordHash],
   );
-
   logger.info({ email: data.email }, 'User account created');
 }
 
@@ -59,27 +60,13 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
       );
     }
 
-    if (data.genres) {
-      await client.query('DELETE FROM genres WHERE user_id = $1', [userId]);
-      for (const genre of data.genres) {
-        await client.query('INSERT INTO genres (user_id, genre) VALUES ($1, $2)', [userId, genre]);
-      }
-    }
-
     const userQuery = client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]);
-    const genreQuery = client.query<GenreRow>('SELECT genre FROM genres WHERE user_id = $1', [
-      userId,
-    ]);
     const planQuery = client.query<PlanRow>(
       'SELECT plan_type FROM plans WHERE user_id = $1 AND is_active = TRUE LIMIT 1',
       [userId],
     );
 
-    const [userResult, genreResult, planResult] = await Promise.all([
-      userQuery,
-      genreQuery,
-      planQuery,
-    ]);
+    const [userResult, planResult] = await Promise.all([userQuery, planQuery]);
     const user = userResult.rows[0];
     logger.info({ userId, fields: Object.keys(data) }, 'User updated');
 
@@ -88,7 +75,6 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
       firstName: user.first_name,
       lastName: user.last_name,
       email: user.email,
-      genres: genreResult.rows.map((r) => r.genre),
       plan: planResult.rows.length > 0 ? planResult.rows[0].plan_type : null,
     };
   });

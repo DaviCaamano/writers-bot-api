@@ -1,9 +1,9 @@
 import type { DocumentResponse, StoryResponse, WorldResponse } from '@/types/response';
 import type { DocumentRow, StoryRow, WorldRow } from '@/types/database';
 import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
+import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
 export { mockPool } from '@/__tests__/constants/mock-database';
 
-export const MOCK_USER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 export const MOCK_WORLD_ID = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
 export const MOCK_STORY_ID = 'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33';
 export const MOCK_DOC_ID = 'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44';

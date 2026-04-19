@@ -1,3 +1,5 @@
+import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
+
 jest.mock('@/utils/database/with-transaction');
 jest.mock('@/utils/database/with-query');
 jest.mock('@/config/database', () => ({
@@ -10,7 +12,6 @@ import { withTransaction } from '@/utils/database/with-transaction';
 import { withQuery } from '@/utils/database/with-query';
 import {
   MOCK_STORY_ID,
-  MOCK_USER_ID,
   MOCK_WORLD_ID,
   MOCK_DOC,
   mockPool,

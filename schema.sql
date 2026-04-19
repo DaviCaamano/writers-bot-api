@@ -52,14 +52,14 @@ CREATE INDEX idx_authentication_token   ON authentication(token);
 -- =============================================================
 
 CREATE TABLE genres (
-    genre_id    UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id     UUID        NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    story_id    UUID        NOT NULL REFERENCES stories(story_id) ON DELETE CASCADE,
     genre       VARCHAR(100) NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE (user_id, genre)
+
+    PRIMARY KEY (story_id, genre)
 );
 
-CREATE INDEX idx_genres_user_id ON genres(user_id);
+CREATE INDEX idx_genres_user_id ON genres(story_id);
 
 
 -- =============================================================

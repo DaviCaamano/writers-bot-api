@@ -1,3 +1,5 @@
+import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
+
 jest.mock('@/config/database');
 jest.mock('@/services/story/world.service');
 jest.mock('@/utils/database/with-transaction');
@@ -11,7 +13,6 @@ import { fetchWorld } from '@/services/story/world.service';
 import {
   MOCK_DOC_ID,
   MOCK_STORY_ID,
-  MOCK_USER_ID,
   MOCK_WORLD_ID,
   MOCK_DOC,
   MOCK_DOCK_RESPONSE,

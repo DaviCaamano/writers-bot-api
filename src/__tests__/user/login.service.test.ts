@@ -13,10 +13,10 @@ import { withQuery } from '@/utils/database/with-query';
 import { fetchLegacy } from '@/services/story/world.service';
 import { login } from '@/services/user/login.service';
 import {
-  mockLoginEmail,
+  MOCK_LOGIN_EMAIL,
   mockLoginResponse,
-  mockLoginToken,
-  mockStrongPassword,
+  MOCK_LOGIN_TOKEN,
+  MOCK_STRONG_PASSWORD,
   mockUser,
 } from '@/__tests__/constants/mock-user';
 import { PoolClient } from 'pg';
@@ -43,11 +43,11 @@ describe(
         .mockResolvedValueOnce({ rows: [{ plan_type: Plan.pro }] });
       mockFetchLegacy.mockImplementation(async () => mockLegacyResponse());
       mockBcryptCompare.mockResolvedValueOnce(true);
-      (jwt.sign as jest.Mock).mockReturnValueOnce(mockLoginToken);
+      (jwt.sign as jest.Mock).mockReturnValueOnce(MOCK_LOGIN_TOKEN);
 
       const response = await login({
-        email: mockLoginEmail,
-        password: mockStrongPassword,
+        email: MOCK_LOGIN_EMAIL,
+        password: MOCK_STRONG_PASSWORD,
       });
 
       expect(response).toMatchObject(mockLoginResponse);
@@ -60,8 +60,8 @@ describe(
 
       void expect(
         login({
-          email: mockLoginEmail,
-          password: mockStrongPassword,
+          email: MOCK_LOGIN_EMAIL,
+          password: MOCK_STRONG_PASSWORD,
         }),
       ).rejects.toThrow(InvalidCredentialsError);
     });
@@ -71,7 +71,7 @@ describe(
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
       mockClient.query.mockResolvedValueOnce({ rows: [mockUser] });
       mockBcryptCompare.mockResolvedValueOnce(false);
-      void expect(login({ email: mockLoginEmail, password: mockStrongPassword })).rejects.toThrow(
+      void expect(login({ email: MOCK_LOGIN_EMAIL, password: MOCK_STRONG_PASSWORD })).rejects.toThrow(
         InvalidCredentialsError,
       );
     });

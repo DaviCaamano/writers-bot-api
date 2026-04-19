@@ -1,7 +1,6 @@
 import {
   MOCK_DOC_ID,
   MOCK_STORY_ID,
-  MOCK_USER_ID,
   MOCK_WORLD_ID,
   MOCK_DOC,
   MOCK_STORY,
@@ -25,6 +24,7 @@ import { mockClear } from '@/__tests__/utils/test-wrappers';
 import * as worldService from '@/services/story/world.service';
 import { DocType, checkLegacyStructure, mockLegacy } from '@/__tests__/utils/mock-linked-documents';
 import { fetchLegacy } from '@/services/story/world.service';
+import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
 
 describe(
   'upsertWorld',

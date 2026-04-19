@@ -11,7 +11,7 @@ import request from 'supertest';
 import app from '@/app';
 import * as userService from '@/services/user/user.service';
 import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
-import { mockStrongPassword, mockSubscriptionRequest } from '@/__tests__/constants/mock-user';
+import { MOCK_STRONG_PASSWORD, mockSubscriptionRequest } from '@/__tests__/constants/mock-user';
 import { mockClear, testAuth } from '@/__tests__/utils/test-wrappers';
 
 const mockCreateUser = userService.createUser as jest.MockedFunction<typeof userService.createUser>;
@@ -44,7 +44,7 @@ describe(
         firstName: 'Jane',
         lastName: 'Doe',
         email: 'not-an-email',
-        password: mockStrongPassword,
+        password: MOCK_STRONG_PASSWORD,
       });
       expect(res.status).toBe(400);
       expect(res.body.details.properties).toHaveProperty('email');
@@ -68,7 +68,7 @@ describe(
         firstName: 'Jane',
         lastName: 'Doe',
         email: 'jane@example.com',
-        password: mockStrongPassword,
+        password: MOCK_STRONG_PASSWORD,
       });
       expect(res.status).toBe(201);
       expect(res.body.status).toBe('ok');
@@ -81,7 +81,7 @@ describe(
         firstName: 'Jane',
         lastName: 'Doe',
         email: 'jane@example.com',
-        password: mockStrongPassword,
+        password: MOCK_STRONG_PASSWORD,
       });
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');

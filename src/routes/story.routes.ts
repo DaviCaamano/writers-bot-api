@@ -15,6 +15,7 @@ import { AuthRequest } from '@/types/request';
 import { upsertDocument } from '@/services/story/document.service';
 import { StoryNotFoundError, WorldNotFoundError } from '@/constants/error/custom-errors';
 import { upsertWorld } from '@/services/story/world.service';
+import { RouteResponse, StoryResponse, WorldResponse } from '@/types/response';
 
 const router = Router();
 
@@ -23,7 +24,7 @@ router.post(
   authMiddleware,
   generalLimiter,
   validate(UpsertDocumentSchema),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  async (req: AuthRequest, res: RouteResponse<WorldResponse | null>): Promise<void> => {
     try {
       const world = await upsertDocument(req.userId!, req.body as UpsertDocumentBody);
       res.json(world);
@@ -42,7 +43,7 @@ router.post(
   authMiddleware,
   generalLimiter,
   validate(UpsertStorySchema),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  async (req: AuthRequest, res: RouteResponse<StoryResponse>): Promise<void> => {
     try {
       const world = await upsertStory(req.userId!, req.body as UpsertStoryBody);
       res.json(world);
@@ -61,7 +62,7 @@ router.post(
   authMiddleware,
   generalLimiter,
   validate(UpsertWorldSchema),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  async (req: AuthRequest, res: RouteResponse<WorldResponse | null>): Promise<void> => {
     try {
       const world = await upsertWorld(req.userId!, req.body as UpsertWorldBody);
       res.json(world);

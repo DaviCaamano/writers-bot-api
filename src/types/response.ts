@@ -1,5 +1,8 @@
 // API response types
 import { Plan } from '@/types/enum/plan';
+import { Response } from 'express';
+
+export type RouteResponse<T> = Response<T | { error: string }>;
 
 export interface DocumentResponse {
   documentId: string;
@@ -42,11 +45,22 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface LogoutResponse {
+  status: string;
+}
+
 export interface UserResponse {
   email: string;
   firstName: string;
   lastName: string;
   plan: Plan | null;
-  genres: string[];
   userId: string;
+}
+
+export interface BillingResponse {
+  billingId: string;
+  planType: Plan;
+  isYearPlan: boolean;
+  amountCents: number;
+  billedAt: Date;
 }

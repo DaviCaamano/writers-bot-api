@@ -37,7 +37,7 @@ describe(
         .set(headers);
 
       expect(res.status).toBe(200);
-      expect(res.body.billingHistory).toEqual(mockBilling);
+      expect(res.body).toEqual(mockBilling);
       expect(mockGetBillingHistory).toHaveBeenCalledWith(mockLoginResponse.userId);
     });
 

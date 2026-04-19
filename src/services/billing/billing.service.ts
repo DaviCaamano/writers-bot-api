@@ -1,7 +1,8 @@
 import pool from '@/config/database';
 import { BillingRow } from '@/types/database';
+import { BillingResponse } from '@/types/response';
 
-export async function getBillingHistory(userId: string) {
+export async function getBillingHistory(userId: string): Promise<BillingResponse[]> {
   const result = await pool.query<BillingRow>(
     `SELECT * FROM billing
      WHERE user_id = $1 AND billed_at >= NOW() - INTERVAL '2 years'

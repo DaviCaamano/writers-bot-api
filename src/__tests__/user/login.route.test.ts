@@ -10,9 +10,9 @@ import request from 'supertest';
 import app from '@/app';
 import * as loginService from '@/services/user/login.service';
 import {
-  mockLoginEmail,
+  MOCK_LOGIN_EMAIL,
   mockLoginResponse,
-  mockStrongPassword,
+  MOCK_STRONG_PASSWORD,
 } from '@/__tests__/constants/mock-user';
 import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
 import { mockClear } from '@/__tests__/utils/test-wrappers';
@@ -33,8 +33,8 @@ describe(
       mockLogin.mockRejectedValueOnce(new InvalidCredentialsError());
 
       const res = await request(app).post('/user/login').send({
-        email: mockLoginEmail,
-        password: mockStrongPassword,
+        email: MOCK_LOGIN_EMAIL,
+        password: MOCK_STRONG_PASSWORD,
       });
       expect(res.status).toBe(401);
       expect(res.body.error).toBe('Invalid email or password');
@@ -45,7 +45,7 @@ describe(
 
       const res = await request(app).post('/user/login').send({
         email: 'jane@example.com',
-        password: mockStrongPassword,
+        password: MOCK_STRONG_PASSWORD,
       });
 
       expect(res.status).toBe(200);

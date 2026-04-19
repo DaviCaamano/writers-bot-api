@@ -13,8 +13,7 @@ export interface UserRow {
 }
 
 export interface GenreRow {
-  genre_id: string;
-  user_id: string;
+  story_id: string;
   genre: string;
   created_at: Date;
 }
