@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
-import { generalLimiter } from '@/config/rate-limiters';
+import { aiLimiter, generalLimiter } from '@/config/rate-limiters';
 import {
   UpsertDocumentSchema,
   UpsertDocumentBody,
@@ -9,12 +9,20 @@ import {
   UpsertStoryBody,
   UpsertWorldSchema,
   UpsertWorldBody,
+  EditorSchema,
+  EditorBody,
 } from '@/schemas/story.schemas';
 import { upsertStory } from '@/services/story/story.service';
 import { AuthRequest } from '@/types/request';
 import { upsertDocument } from '@/services/story/document.service';
-import { StoryNotFoundError, WorldNotFoundError } from '@/constants/error/custom-errors';
+import {
+  DocumentNotFoundError,
+  InvalidSelectionError,
+  StoryNotFoundError,
+  WorldNotFoundError,
+} from '@/constants/error/custom-errors';
 import { upsertWorld } from '@/services/story/world.service';
+import { editText } from '@/services/story/editor.service';
 import { RouteResponse, StoryResponse, WorldResponse } from '@/types/response';
 
 const router = Router();
@@ -72,6 +80,29 @@ router.post(
       } else {
         throw err;
       }
+    }
+  },
+);
+
+router.post(
+  '/editor',
+  authMiddleware,
+  aiLimiter,
+  validate(EditorSchema),
+  async (req: AuthRequest, res: RouteResponse<never>): Promise<void> => {
+    try {
+      const body = req.body as EditorBody;
+      await editText(req.userId!, body.documentId, body.selection, body.prompt, res);
+    } catch (err) {
+      if (err instanceof DocumentNotFoundError) {
+        res.status(404).json({ error: 'Document not found' });
+        return;
+      }
+      if (err instanceof InvalidSelectionError) {
+        res.status(400).json({ error: 'Invalid selection range' });
+        return;
+      }
+      throw err;
     }
   },
 );

@@ -36,3 +36,11 @@ export const subscribeLimiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
 });
+
+export const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 20,
+  message: rateLimitMessage('AI generation'),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+});
