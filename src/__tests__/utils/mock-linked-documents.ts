@@ -10,7 +10,6 @@ import {
   DocumentRow,
   StoryRow,
   StoryRowWithDocuments,
-  WorldRow,
   WorldRowWithStories,
 } from '@/types/database';
 import { DocumentResponse, StoryResponse, WorldResponse } from '@/types/response';
@@ -152,8 +151,18 @@ export function checkDocListStructure(
       : docType === DocType.storyRow
         ? checkDocListStructure((doc as StoryRowWithDocuments).documents, DocType.documentRow)
         : checkDocListStructure((doc as StoryResponse).documents, DocType.documentResponse);
-    const predecessorId = predecessor?.['document_id'] ?? predecessor?.['documentId'] ?? predecessor?.['story_id'] ?? predecessor?.['storyId'] ?? null;
-    const successorId = successor?.['document_id'] ?? successor?.['documentId'] ?? successor?.['story_id'] ?? successor?.['storyId'] ?? null;
+    const predecessorId =
+      predecessor?.['document_id'] ??
+      predecessor?.['documentId'] ??
+      predecessor?.['story_id'] ??
+      predecessor?.['storyId'] ??
+      null;
+    const successorId =
+      successor?.['document_id'] ??
+      successor?.['documentId'] ??
+      successor?.['story_id'] ??
+      successor?.['storyId'] ??
+      null;
     return (
       (typedDoc[indexIds.predecessorId] ?? null) === predecessorId &&
       (typedDoc[indexIds.successorId] ?? null) === successorId &&
@@ -179,7 +188,9 @@ const defaultDocumentMatrix: DocumentMatrix = [
 ];
 
 // A helper to mock a legacy (all worlds that belong to a single user)
-export const mockLegacy = (documentMatrix: DocumentMatrix = defaultDocumentMatrix): WorldRowWithStories[] => {
+export const mockLegacy = (
+  documentMatrix: DocumentMatrix = defaultDocumentMatrix,
+): WorldRowWithStories[] => {
   return documentMatrix.map((stories, index) => ({
     ...MOCK_WORLD,
     world_id: 'world-' + (index + 1),

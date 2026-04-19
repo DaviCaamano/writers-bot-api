@@ -23,13 +23,7 @@ import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
 import { mockClear } from '@/__tests__/utils/test-wrappers';
 
 import * as worldService from '@/services/story/world.service';
-import {
-  DocType,
-  mockDocList,
-  checkLegacyStructure,
-  mockLegacy,
-} from '@/__tests__/utils/mock-linked-documents';
-import { WorldRow } from '@/types/database';
+import { DocType, checkLegacyStructure, mockLegacy } from '@/__tests__/utils/mock-linked-documents';
 import { fetchLegacy } from '@/services/story/world.service';
 
 describe(
@@ -166,7 +160,6 @@ describe(
     });
   }),
 );
-
 
 describe(
   'fetchLegacy',
