@@ -29,7 +29,7 @@ describe(
   mockClear(() => {
     it('should insert a new world when no worldId is provided', async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(MOCK_WORLD_RESPONSE);
-      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ world_id: MOCK_WORLD_ID }] }); // INSERT worlds
+      mockPool.query.mockResolvedValueOnce({ rows: [{ world_id: MOCK_WORLD_ID }] }); // INSERT worlds
 
       const result = await worldService.upsertWorld(
         MOCK_USER_ID,
@@ -44,7 +44,7 @@ describe(
       const updatedResponse = { ...MOCK_WORLD_RESPONSE, title: 'Updated World' };
       const mockFetch = jest.fn().mockResolvedValueOnce(updatedResponse);
 
-      (mockPool.query as jest.Mock)
+      mockPool.query
         .mockResolvedValueOnce({ rows: [{}] }) // SELECT 1 (ownership check)
         .mockResolvedValueOnce({}); // UPDATE worlds
 
@@ -59,7 +59,7 @@ describe(
     });
 
     it('throw WorldNotFoundError when worldId does not exist', async () => {
-      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(
         worldService.upsertWorld(MOCK_USER_ID, { worldId: MOCK_WORLD_ID, title: 'Updated World' }),
@@ -72,14 +72,14 @@ describe(
   'fetchWorld',
   mockClear(() => {
     it('should return null when the world does not exist', async () => {
-      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       const result = await worldService.fetchWorld(MOCK_WORLD_ID);
       expect(result).toBeNull();
     });
 
     it('should return the world with nested stories and documents', async () => {
-      (mockPool.query as jest.Mock)
+      mockPool.query
         .mockResolvedValueOnce({ rows: [MOCK_WORLD] })
         .mockResolvedValueOnce({ rows: [MOCK_STORY] })
         .mockResolvedValueOnce({ rows: [MOCK_DOC] });
@@ -119,7 +119,7 @@ describe(
     });
 
     it('should return a mapped world with no stories', async () => {
-      (mockPool.query as jest.Mock)
+      mockPool.query
         .mockResolvedValueOnce({ rows: [MOCK_WORLD] }) // SELECT worlds
         .mockResolvedValueOnce({ rows: [] }); // SELECT stories
 
@@ -147,7 +147,7 @@ describe(
         [],
       );
 
-      (mockPool.query as jest.Mock)
+      mockPool.query
         .mockResolvedValueOnce({ rows: worldList })
         .mockResolvedValueOnce({ rows: storyList })
         .mockResolvedValueOnce({ rows: documentList });
@@ -163,12 +163,12 @@ describe(
   'fetchLegacy',
   mockClear(() => {
     it('should return an empty array when user has no worlds', async () => {
-      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
       expect(await fetchLegacy(MOCK_USER_ID)).toEqual([]);
     });
 
     it('should return worlds with nested stories and documents', async () => {
-      (mockPool.query as jest.Mock)
+      mockPool.query
         .mockResolvedValueOnce({ rows: [MOCK_WORLD] })
         .mockResolvedValueOnce({ rows: [MOCK_STORY] })
         .mockResolvedValueOnce({ rows: [MOCK_DOC] });
@@ -228,7 +228,7 @@ describe(
         >((acc, world) => [...acc, ...(world.stories as StoryRowWithDocuments[])], [])
         .reduce<DocumentRow[]>((acc, story) => [...acc, ...story.documents], []);
 
-      (mockPool.query as jest.Mock)
+      mockPool.query
         .mockResolvedValueOnce({ rows: worldList })
         .mockResolvedValueOnce({ rows: storyList })
         .mockResolvedValueOnce({ rows: documentList });
@@ -242,7 +242,7 @@ describe(
     });
 
     it('should skip the documents query when there are no stories', async () => {
-      (mockPool.query as jest.Mock)
+      mockPool.query
         .mockResolvedValueOnce({ rows: [MOCK_WORLD] })
         .mockResolvedValueOnce({ rows: [] }); // no stories — documents query should NOT fire
 

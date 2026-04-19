@@ -63,7 +63,7 @@ describe(
         const token = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '7d' });
 
         // auth middleware uses pool.query directly; logout handler uses withQuery (pool.connect)
-        (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ user_id: userId }] });
+        mockPool.query.mockResolvedValueOnce({ rows: [{ user_id: userId }] });
         (mockPool.connect as jest.Mock).mockResolvedValueOnce({
           query: jest.fn().mockResolvedValueOnce({ rows: [] }),
           release: jest.fn(),
