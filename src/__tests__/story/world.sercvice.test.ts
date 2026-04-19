@@ -8,8 +8,6 @@ import {
   MOCK_WORLD_RESPONSE,
 } from '@/__tests__/constants/mock-story';
 
-jest.mock('@/config/database');
-
 import { WorldNotFoundError } from '@/constants/error/custom-errors';
 import {
   DocumentRow,

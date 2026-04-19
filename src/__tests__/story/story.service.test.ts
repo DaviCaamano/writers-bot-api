@@ -2,10 +2,6 @@ import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
 
 jest.mock('@/utils/database/with-transaction');
 jest.mock('@/utils/database/with-query');
-jest.mock('@/config/database', () => ({
-  __esModule: true,
-  default: { query: jest.fn(), connect: jest.fn() },
-}));
 
 import * as storyService from '@/services/story/story.service';
 import { withTransaction } from '@/utils/database/with-transaction';
@@ -19,7 +15,6 @@ import {
   MOCK_STORY_RESPONSE,
 } from '@/__tests__/constants/mock-story';
 import { createMockClient } from '@/__tests__/constants/mock-database';
-import pool from '@/config/database';
 import { PoolClient } from 'pg';
 import { mockClear } from '@/__tests__/utils/test-wrappers';
 import { StoryNotFoundError, WorldNotFoundError } from '@/constants/error/custom-errors';
@@ -31,12 +26,12 @@ describe(
   'fetchStory',
   mockClear(() => {
     it('should fetch a story by its ID', async () => {
-      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [MOCK_STORY] });
+      mockPool.query.mockResolvedValueOnce({ rows: [MOCK_STORY] });
       expect(await storyService.fetchStory(MOCK_STORY_ID)).toEqual(MOCK_STORY);
     });
 
     it('throw StoryNotFoundError error when the story is not found', async () => {
-      (mockPool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
       await expect(storyService.fetchStory(MOCK_STORY_ID)).rejects.toThrow(StoryNotFoundError);
     });
   }),

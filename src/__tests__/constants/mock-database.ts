@@ -1,9 +1,7 @@
-jest.mock('@/config/database');
-
 import pool from '@/config/database';
 import { Pool, PoolClient } from 'pg';
 
-export const mockPool = pool as jest.Mocked<Pool>;
+export const mockPool = pool as Pool & { query: jest.Mock; connect: jest.Mock };
 
 export interface MockPoolClient extends PoolClient {
   query: jest.Mock;

@@ -1,7 +1,3 @@
-jest.mock('@/config/database', () => ({
-  __esModule: true,
-  default: { query: jest.fn(), connect: jest.fn() },
-}));
 jest.mock('@/utils/database/with-transaction');
 jest.mock('@/utils/database/with-query');
 jest.mock('@/config/stripe', () => ({
@@ -15,17 +11,16 @@ jest.mock('@/config/stripe', () => ({
 
 import { addGenres, createUser, subscribe, updateUser } from '@/services/user/user.service';
 import {
-  mockGenre,
+  MOCK_GENRE,
   MOCK_GENRES,
-  mockNewUser,
-  mockPlan,
-  mockSubscriptionRequest,
-  mockUpdatingUser,
-  mockUser,
+  MOCK_NEW_USER,
+  MOCK_PLAN,
+  MOCK_SUBSCRIPTION_REQUEST,
+  MOCK_UPDATING_USER,
+  MOCK_USER,
   MOCK_USER_ID,
 } from '@/__tests__/constants/mock-user';
-import { createMockClient } from '@/__tests__/constants/mock-database';
-import pool from '@/config/database';
+import { createMockClient, mockPool } from '@/__tests__/constants/mock-database';
 import { EmailTakenError, StripePaymentFailed } from '@/constants/error/custom-errors';
 import { PoolClient } from 'pg';
 import { withQuery } from '@/utils/database/with-query';
@@ -40,15 +35,13 @@ describe(
   'user service: createUser',
   mockClear(() => {
     it('should create a new user', async () => {
-      (pool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce(undefined);
-      await expect(createUser(mockNewUser)).resolves.not.toThrow();
+      mockPool.query.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce(undefined);
+      await expect(createUser(MOCK_NEW_USER)).resolves.not.toThrow();
     });
 
     it('throw EmailTakenError error if email is taken', async () => {
-      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [mockUser] });
-      await expect(createUser(mockNewUser)).rejects.toThrow(EmailTakenError);
+      mockPool.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
+      await expect(createUser(MOCK_NEW_USER)).rejects.toThrow(EmailTakenError);
     });
   }),
 );
@@ -60,12 +53,12 @@ describe(
       const mockClient = createMockClient();
       mockClient.query
         .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce({ rows: [mockUser] })
-        .mockResolvedValueOnce({ rows: [mockPlan] });
+        .mockResolvedValueOnce({ rows: [MOCK_USER] })
+        .mockResolvedValueOnce({ rows: [MOCK_PLAN] });
 
       mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
 
-      await expect(updateUser(MOCK_USER_ID, mockUpdatingUser)).resolves.not.toThrow();
+      await expect(updateUser(MOCK_USER_ID, MOCK_UPDATING_USER)).resolves.not.toThrow();
     });
   }),
 );
@@ -78,7 +71,7 @@ describe(
       mockClient.query
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce({ rows: [mockGenre] });
+        .mockResolvedValueOnce({ rows: [MOCK_GENRE] });
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
       await expect(addGenres(MOCK_USER_ID, MOCK_GENRES)).resolves.not.toThrow();
     });
@@ -92,14 +85,14 @@ describe(
       const mockClient = createMockClient();
       mockClient.query
         .mockResolvedValueOnce({ rows: [{ cnt: '0' }] })
-        .mockResolvedValueOnce({ rows: [mockUser] })
+        .mockResolvedValueOnce({ rows: [MOCK_USER] })
         .mockResolvedValueOnce(undefined) // updatePlanQuery
         .mockResolvedValueOnce(undefined) // insertPlanQuery
         .mockResolvedValueOnce(undefined); // insertBillingQuery
       mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
       (stripe.paymentMethods.attach as jest.Mock).mockResolvedValueOnce({});
       (stripe.paymentIntents.create as jest.Mock).mockResolvedValueOnce(mockStripePaymentIntent);
-      await expect(subscribe(MOCK_USER_ID, mockSubscriptionRequest)).resolves.not.toThrow();
+      await expect(subscribe(MOCK_USER_ID, MOCK_SUBSCRIPTION_REQUEST)).resolves.not.toThrow();
     });
 
     it('should update users stripe customer id', async () => {
@@ -107,7 +100,7 @@ describe(
       // pool.query: calculatePrice billing count, user lookup (no stripe_customer_id), update stripe_customer_id
       mockClient.query
         .mockResolvedValueOnce({ rows: [{ cnt: '0' }] })
-        .mockResolvedValueOnce({ rows: [{ ...mockUser, stripe_customer_id: null }] })
+        .mockResolvedValueOnce({ rows: [{ ...MOCK_USER, stripe_customer_id: null }] })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined) // updatePlanQuery
         .mockResolvedValueOnce(undefined) // insertPlanQuery
@@ -116,14 +109,14 @@ describe(
       (stripe.customers.create as jest.Mock).mockResolvedValueOnce(mockStripCustomer);
       (stripe.paymentMethods.attach as jest.Mock).mockResolvedValueOnce({});
       (stripe.paymentIntents.create as jest.Mock).mockResolvedValueOnce(mockStripePaymentIntent);
-      await expect(subscribe(MOCK_USER_ID, mockSubscriptionRequest)).resolves.not.toThrow();
+      await expect(subscribe(MOCK_USER_ID, MOCK_SUBSCRIPTION_REQUEST)).resolves.not.toThrow();
     });
 
     it('throw StripePaymentFailed error if stripe paymentIntent failed', async () => {
       const mockClient = createMockClient();
       mockClient.query
         .mockResolvedValueOnce({ rows: [{ cnt: '0' }] })
-        .mockResolvedValueOnce({ rows: [{ ...mockUser, stripe_customer_id: null }] })
+        .mockResolvedValueOnce({ rows: [{ ...MOCK_USER, stripe_customer_id: null }] })
         .mockResolvedValueOnce(undefined);
       mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
       (stripe.customers.create as jest.Mock).mockResolvedValueOnce(mockStripCustomer);
@@ -132,7 +125,7 @@ describe(
         ...mockStripePaymentIntent,
         status: 'canceled',
       });
-      await expect(subscribe(MOCK_USER_ID, mockSubscriptionRequest)).rejects.toThrow(
+      await expect(subscribe(MOCK_USER_ID, MOCK_SUBSCRIPTION_REQUEST)).rejects.toThrow(
         StripePaymentFailed,
       );
     });

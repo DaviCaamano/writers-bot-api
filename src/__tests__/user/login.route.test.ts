@@ -1,17 +1,13 @@
 import { InvalidCredentialsError } from '@/constants/error/custom-errors';
 
 jest.mock('@/services/user/login.service');
-jest.mock('@/config/database', () => ({
-  __esModule: true,
-  default: { query: jest.fn(), connect: jest.fn() },
-}));
 
 import request from 'supertest';
 import app from '@/app';
 import * as loginService from '@/services/user/login.service';
 import {
   MOCK_LOGIN_EMAIL,
-  mockLoginResponse,
+  MOCK_LOGIN_RESPONSE,
   MOCK_STRONG_PASSWORD,
 } from '@/__tests__/constants/mock-user';
 import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
@@ -41,7 +37,7 @@ describe(
     });
 
     it('returns 200 with user data on success', async () => {
-      mockLogin.mockResolvedValueOnce(mockLoginResponse);
+      mockLogin.mockResolvedValueOnce(MOCK_LOGIN_RESPONSE);
 
       const res = await request(app).post('/user/login').send({
         email: 'jane@example.com',
@@ -49,7 +45,7 @@ describe(
       });
 
       expect(res.status).toBe(200);
-      expect(res.body).toMatchObject(JSON.parse(JSON.stringify(mockLoginResponse)));
+      expect(res.body).toMatchObject(JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE)));
     });
   }),
 );

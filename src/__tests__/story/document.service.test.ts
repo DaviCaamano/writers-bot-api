@@ -1,6 +1,5 @@
 import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
 
-jest.mock('@/config/database');
 jest.mock('@/services/story/world.service');
 jest.mock('@/utils/database/with-transaction');
 jest.mock('@/utils/database/with-query');
@@ -17,10 +16,10 @@ import {
   MOCK_DOC,
   MOCK_DOCK_RESPONSE,
   MOCK_WORLD_RESPONSE,
+  mockPool,
 } from '@/__tests__/constants/mock-story';
 import { createMockClient } from '@/__tests__/constants/mock-database';
 import { mockClear } from '@/__tests__/utils/test-wrappers';
-import pool from '@/config/database';
 
 const mockFetchWorld = fetchWorld as jest.MockedFunction<typeof fetchWorld>;
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
@@ -32,7 +31,7 @@ describe(
     it('should fetch a document by its ID', async () => {
       mockWithQuery.mockImplementation((callback) => callback(mockClient as any));
       const mockClient = createMockClient();
-      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [MOCK_DOC] });
+      mockPool.query.mockResolvedValueOnce({ rows: [MOCK_DOC] });
       expect(await fetchDocument(MOCK_DOC_ID)).toEqual(MOCK_DOCK_RESPONSE);
     });
   }),

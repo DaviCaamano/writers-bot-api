@@ -1,7 +1,3 @@
-jest.mock('@/config/database', () => ({
-  __esModule: true,
-  default: { query: jest.fn(), connect: jest.fn() },
-}));
 jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 
 import request from 'supertest';

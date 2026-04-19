@@ -5,6 +5,7 @@ const config: Config = {
   testEnvironment: 'node',
   testMatch: ['**/src/__tests__/**/*.test.ts'],
   setupFiles: ['./src/config/jest-setup.ts'],
+  setupFilesAfterEnv: ['./src/config/jest-mocks.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },

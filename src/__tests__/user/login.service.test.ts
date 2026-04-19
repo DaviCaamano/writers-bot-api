@@ -1,9 +1,5 @@
 import { Plan } from '@/types/enum/plan';
 
-jest.mock('@/config/database', () => ({
-  __esModule: true,
-  default: { query: jest.fn(), connect: jest.fn() },
-}));
 jest.mock('@/utils/database/with-query');
 jest.mock('@/services/story/world.service');
 jest.mock('bcrypt');
@@ -14,10 +10,10 @@ import { fetchLegacy } from '@/services/story/world.service';
 import { login } from '@/services/user/login.service';
 import {
   MOCK_LOGIN_EMAIL,
-  mockLoginResponse,
+  MOCK_LOGIN_RESPONSE,
   MOCK_LOGIN_TOKEN,
   MOCK_STRONG_PASSWORD,
-  mockUser,
+  MOCK_USER,
 } from '@/__tests__/constants/mock-user';
 import { PoolClient } from 'pg';
 import { createMockClient } from '@/__tests__/constants/mock-database';
@@ -38,7 +34,7 @@ describe(
       const mockClient = createMockClient();
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
       mockClient.query
-        .mockResolvedValueOnce({ rows: [mockUser] })
+        .mockResolvedValueOnce({ rows: [MOCK_USER] })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({ rows: [{ plan_type: Plan.pro }] });
       mockFetchLegacy.mockImplementation(async () => mockLegacyResponse());
@@ -50,7 +46,7 @@ describe(
         password: MOCK_STRONG_PASSWORD,
       });
 
-      expect(response).toMatchObject(mockLoginResponse);
+      expect(response).toMatchObject(MOCK_LOGIN_RESPONSE);
     });
 
     it('throw InvalidCredentialsError error if email does not exist', async () => {
@@ -69,11 +65,11 @@ describe(
     it('throw InvalidCredentialsError error if password is incorrect', async () => {
       const mockClient = createMockClient();
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      mockClient.query.mockResolvedValueOnce({ rows: [mockUser] });
+      mockClient.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
       mockBcryptCompare.mockResolvedValueOnce(false);
-      void expect(login({ email: MOCK_LOGIN_EMAIL, password: MOCK_STRONG_PASSWORD })).rejects.toThrow(
-        InvalidCredentialsError,
-      );
+      void expect(
+        login({ email: MOCK_LOGIN_EMAIL, password: MOCK_STRONG_PASSWORD }),
+      ).rejects.toThrow(InvalidCredentialsError);
     });
   }),
 );

@@ -3,10 +3,6 @@ import { StoryNotFoundError, WorldNotFoundError } from '@/constants/error/custom
 jest.mock('@/services/story/story.service');
 jest.mock('@/services/story/document.service');
 jest.mock('@/services/story/world.service');
-jest.mock('@/config/database', () => ({
-  __esModule: true,
-  default: { query: jest.fn(), connect: jest.fn() },
-}));
 jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
 
 import request from 'supertest';
@@ -22,7 +18,7 @@ const mockUpsertDocument = documentService.upsertDocument as jest.Mock;
 const mockUpsertStory = storyService.upsertStory as jest.Mock;
 const mockUpsertWorld = worldService.upsertWorld as jest.Mock;
 
-const MOCK_USER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'; // must match mockLoginResponse.userId
+const MOCK_USER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'; // must match MOCK_LOGIN_RESPONSE.userId
 const MOCK_WORLD_ID = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
 const MOCK_STORY_ID = 'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33';
 

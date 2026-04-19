@@ -8,6 +8,10 @@ export const mockStripeEmailRecipient = 'john@example.com';
 export const mockStripeCustomerId = 'cus_1234567890';
 export const mockStripeSubscriptionId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13';
 export const mockStipePaymentMethodId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15';
+
+export const MOCK_STRIPE_INVOICE_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bdyy0a16';
+export const MOCK_STRIPE_PAYMENT_INTENT_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bdyy0a17';
+
 export const mockStripAddress = {
   city: 'Miami',
   country: 'United States of America',

@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router } from 'express';
 import { authMiddleware } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
 import { generalLimiter } from '@/config/rate-limiters';
