@@ -10,6 +10,7 @@ import {
   SubscribeSchema,
 } from '@/schemas/user.schemas';
 import {
+  EditorSchema,
   UpsertDocumentSchema,
   UpsertStorySchema,
   UpsertWorldSchema,
@@ -85,13 +86,14 @@ const LoginResponseSchema = registry.register(
 );
 
 // Registered request schemas
-const LoginRequest = registry.register('LoginRequest', LoginSchema);
 const CreateUserRequest = registry.register('CreateUserRequest', CreateUserSchema);
-const UpdateUserRequest = registry.register('UpdateUserRequest', UpdateUserSchema);
+const EditorRequest = registry.register('EditorRequest', EditorSchema);
 const GenresRequest = registry.register('GenresRequest', GenresSchema);
+const LoginRequest = registry.register('LoginRequest', LoginSchema);
 const SubscribeRequest = registry.register('SubscribeRequest', SubscribeSchema);
 const UpsertDocumentRequest = registry.register('UpsertDocumentRequest', UpsertDocumentSchema);
 const UpsertStoryRequest = registry.register('UpsertStoryRequest', UpsertStorySchema);
+const UpdateUserRequest = registry.register('UpdateUserRequest', UpdateUserSchema);
 const UpsertWorldRequest = registry.register('UpsertWorldRequest', UpsertWorldSchema);
 
 const json = (schema: z.ZodTypeAny) => ({ content: { 'application/json': { schema } } });
@@ -258,6 +260,22 @@ registry.registerPath({
     200: { description: 'The world', ...json(WorldSchema) },
     400: err400,
     401: err401,
+    500: err500,
+  },
+});
+
+registry.registerPath({
+  method: 'post',
+  path: '/story/editor',
+  tags: ['Story'],
+  summary: 'Edits for a passage of text within a document',
+  security: secured,
+  request: { body: json(EditorRequest) },
+  responses: {
+    200: { description: 'Successfully Edited passage of text' },
+    400: err400,
+    401: err401,
+    404: err404,
     500: err500,
   },
 });

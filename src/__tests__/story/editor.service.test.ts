@@ -44,7 +44,13 @@ describe(
       });
 
       await expect(
-        editText(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: body.length + 1 }, 'rewrite', createMockRes()),
+        editText(
+          MOCK_USER_ID,
+          MOCK_DOC_ID,
+          { start: 0, end: body.length + 1 },
+          'rewrite',
+          createMockRes(),
+        ),
       ).rejects.toThrow(InvalidSelectionError);
     });
 
@@ -75,7 +81,13 @@ describe(
       });
       mockStream.mockReturnValueOnce(asyncIter([]));
 
-      await editText(MOCK_USER_ID, MOCK_DOC_ID, { start: 6, end: 11 }, 'make it louder', createMockRes());
+      await editText(
+        MOCK_USER_ID,
+        MOCK_DOC_ID,
+        { start: 6, end: 11 },
+        'make it louder',
+        createMockRes(),
+      );
 
       const args = mockStream.mock.calls[0][0];
       expect(args.messages[0].content).toContain('<selection>\nworld\n</selection>');
