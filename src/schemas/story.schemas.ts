@@ -25,7 +25,7 @@ export const EditorSchema = z
       start: z.number().int().min(0),
       end: z.number().int().min(0),
     }),
-    prompt: z.string().min(1, 'Prompt is required').max(1000),
+    prompt: z.string().max(1000),
   })
   .refine((data) => data.selection.end > data.selection.start, {
     message: 'selection.end must be greater than selection.start',

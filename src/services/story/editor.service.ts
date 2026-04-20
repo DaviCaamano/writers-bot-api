@@ -58,7 +58,7 @@ export async function editText(
 
   const stream = anthropic.messages.stream({
     model: process.env.NODE_ENV === 'development' ? ClaudeModel.Haiku4_5 : ClaudeModel.Opus4_7,
-    max_tokens: 64000,
+    max_tokens: 1000,
     system: `You are an expert creative writing assistant. The user will provide you with story context, a selected passage, and instructions for how to rewrite it. Return ONLY the replacement text — no preamble, no explanation, no quotation marks around the output.`,
     messages: [
       {

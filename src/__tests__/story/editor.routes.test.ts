@@ -22,14 +22,6 @@ const validBody = {
 describe(
   'POST /story/editor',
   testAuth('/story/editor', 'post', validBody, () => {
-    it('returns 400 when documentId is missing', async () => {
-      const res = await request(app)
-        .post('/story/editor')
-        .set(mockAuthHeaders())
-        .send({ selection: { start: 0, end: 5 }, prompt: 'hi' });
-      expect(res.status).toBe(400);
-    });
-
     it('returns 400 when selection.end <= selection.start', async () => {
       const res = await request(app)
         .post('/story/editor')

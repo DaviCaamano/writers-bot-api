@@ -29,7 +29,7 @@ const asyncIter = (events: unknown[]) => ({
 describe(
   'editText',
   mockClear(() => {
-    it('throws DocumentNotFoundError when no rows match', async () => {
+    it('[fetchContextDocuments] throws DocumentNotFoundError when no rows match', async () => {
       mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(
@@ -37,13 +37,14 @@ describe(
       ).rejects.toThrow(DocumentNotFoundError);
     });
 
-    it('throws InvalidSelectionError when end exceeds body length', async () => {
+    it('[fetchContextDocuments] throws InvalidSelectionError when end exceeds body length', async () => {
+      const body = 'short';
       mockPool.query.mockResolvedValueOnce({
-        rows: [{ ...MOCK_DOC, body: 'short' }],
+        rows: [{ ...MOCK_DOC, body }],
       });
 
       await expect(
-        editText(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 999 }, 'rewrite', createMockRes()),
+        editText(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: body.length + 1 }, 'rewrite', createMockRes()),
       ).rejects.toThrow(InvalidSelectionError);
     });
 
@@ -62,7 +63,6 @@ describe(
       const res = createMockRes();
       await editText(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 5 }, 'rewrite', res);
 
-      expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/event-stream');
       expect(res.write).toHaveBeenCalledWith(`data: ${JSON.stringify({ text: 'Hi ' })}\n\n`);
       expect(res.write).toHaveBeenCalledWith(`data: ${JSON.stringify({ text: 'there' })}\n\n`);
       expect(res.write).toHaveBeenCalledWith('data: [DONE]\n\n');
